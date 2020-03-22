@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <unistd.h>
-#include "Tilemap.cpp"
+#include "Tilemap.h"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	
 	//cout << "\033[?7h";
 	
-	Tilemap *tMap = new Tilemap(10,10);
+	Tilemap *tMap = new Tilemap();
 	
 	char c = 'a';
 	int fps = 3;

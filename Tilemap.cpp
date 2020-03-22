@@ -36,12 +36,8 @@ Tilemap::~Tilemap() {
 	cout << "\0338";	// restorecursor DECSC; Restore cursor position and attributes
 }
 
-
-
-
-
-
 void Tilemap::initializeMap(char initChar) {
+	cout << "\033[2J\033[1;1H";	// Faking a clear screen using ANSI escape codes	
 	map = new char*[y];
 	for(int i = 0; i < y; ++i) {
 		map[i] = new char[x];
@@ -54,15 +50,15 @@ void Tilemap::initializeMap(char initChar) {
 
 
 
-void Tilemap::updateTerminal() {
-	
+void Tilemap::updateTerminal() {	
 	cout << "\033[H";	// cursorhome; Move cursor to upper left corner
-	
 	for(int i = 0; i < y; ++i) {
 		for(int j = 0; j < x; ++j) {
 			cout << map[i][j];
 		}
-		cout << "\033E";	// nextline NEL; Move to next line
+		if(i != y-1) {
+			cout << "\n";	// nextline NEL; Move to next line
+		}
 	}
 	
 	cout << flush;
