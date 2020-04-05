@@ -11,13 +11,13 @@ class Player {
  private:
  	SocketConnection; // Represented in "Client" variable in other classes.
  	bool isHost;
- 	string DisplayName;
+ 	string displayName;
 
  public:
- 	Player(SocketConnection, isHost, DisplayName);
+ 	Player(SocketConnection, bool isHost, string displayName);
  	~Player();
 
- 	ChangeName();
+ 	changeName(string newName);
  	SendToPlayer();
  	// etc
 

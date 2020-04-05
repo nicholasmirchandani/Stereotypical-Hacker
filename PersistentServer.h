@@ -9,21 +9,25 @@
 #ifndef PERSISTENT_SERVER
 #define PERSISTENT_SERVER
 
-#include A threading library
-#include Our socket connection library
-#include Random
+//#include A threading library
+//#include Our socket connection library
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+#include "Lobby.h"
 
 class PersistentServer {
 
 	private:
 		int LobbyNumberLimit;
 		int MaxPlayersPerLobby;
+		std::list<Lobby> activeLobbies;
 
 		bool ThreadContinue; // All threads run until ThreadContinue == false, Maybe a reference to one or something.
 
-		ThreadID LobbyListener;
+		//ThreadID LobbyListener;
 
-		Dictionary<RoomCode, Lobby> LobbyCodesAndLobbies; // Dictionary tracking lobbies by room code and references to the Lobby objects
+		std::map<RoomCode, Lobby> LobbyCodesAndLobbies; // Dictionary tracking lobbies by room code and references to the Lobby objects
 
 	public:
 		PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby);
@@ -31,7 +35,7 @@ class PersistentServer {
 
 		void ServerFunctions(); // A loop for managing threads and other server functions without being blocked on waiting for connections
 
-		void ClientConnector(); // A separate thread from the server loop, waits for clients attempting to connect 
+		void ClientConnector(); // A separate thread from the server loop, waits for clients attempting to connect
 
 		void AddLobby(Client); // Generates a new room code, client list, and lobby thread.
 

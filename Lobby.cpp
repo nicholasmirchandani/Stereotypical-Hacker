@@ -6,13 +6,15 @@
  *  players, and logic for lobby operations and game running.
  */
 
-Lobby::Lobby(RoomCode, MaxPlayers, HostClient) {
+#include "Lobby.h"
 
-	Assign RoomCode;
-	Assign MaxPlayers;
+Lobby::Lobby(string RoomCode, int MaxPlayers, Socket HostClient) {
+
+	this.RoomCode = RoomCode;
+	this.MaxPlayers = MaxPlayers;
 	playerCount = 0;
-	
-	PlayersInLobby = new ClientList, size of MaxPlayers;
+
+	//PlayersInLobby = new ClientList, size of MaxPlayers;
 	AddPlayer(HostClient, isHost = true); // Keep host player at front to check for security of Lobby commands
 
 	LobbyThread =  start LobbyLoop;
@@ -43,16 +45,16 @@ void Lobby::RunGame() {
 
 }
 
-void Lobby::AddPlayer(Client, isHost) {
+void Lobby::AddPlayer(Socket client, bool isHost) {
 
 	Player p = new Player(Client, isHost, "SomeGeneratedDisplayName");
-	add p to PlayersInLobby;
-	Start Thread(ClientListener(Client, isHost));
+	PlayersInLobby.push_back(p);
+	//Start Thread(ClientListener(Client, isHost));
 	playerCount++;
 
 }
 
-void Lobby::ClientListener(Client, isHost) {
+void Lobby::ClientListener(socket client, bool isHost) {
 
 	while (ThreadContinue && /*Client is connected*/) {
 		string command = input from client;
