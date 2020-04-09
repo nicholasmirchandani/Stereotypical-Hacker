@@ -8,7 +8,7 @@
 
 #include "Lobby.h"
 
-Lobby::Lobby(string RoomCode, int MaxPlayers, Socket HostClient) {
+Lobby::Lobby(string RoomCode, int MaxPlayers, SocketConnection HostClient) {
 
 	this.RoomCode = RoomCode;
 	this.MaxPlayers = MaxPlayers;
@@ -17,7 +17,7 @@ Lobby::Lobby(string RoomCode, int MaxPlayers, Socket HostClient) {
 	//PlayersInLobby = new ClientList, size of MaxPlayers;
 	AddPlayer(HostClient, isHost = true); // Keep host player at front to check for security of Lobby commands
 
-	LobbyThread =  start LobbyLoop;
+	//std::thread LobbyThread(LobbyLoop);
 
 }
 
@@ -45,18 +45,18 @@ void Lobby::RunGame() {
 
 }
 
-void Lobby::AddPlayer(Socket client, bool isHost) {
+void Lobby::AddPlayer(SocketConnection client, bool isHost) {
 
-	Player p = new Player(Client, isHost, "SomeGeneratedDisplayName");
+	Player p = new Player(client, isHost, "SomeGeneratedDisplayName");
 	PlayersInLobby.push_back(p);
-	//Start Thread(ClientListener(Client, isHost));
+	//std::thread clientThread(ClientListener, client, isHost);
 	playerCount++;
 
 }
 
-void Lobby::ClientListener(socket client, bool isHost) {
+void Lobby::ClientListener(SocketConnection client, bool isHost) {
 
-	while (ThreadContinue && /*Client is connected*/) {
+	while (clientThread && /*Client is connected*/) {
 		string command = input from client;
 		switch (commmand) {
 			go through normal command palette;
