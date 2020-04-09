@@ -9,12 +9,16 @@
 #ifndef PERSISTENT_SERVER
 #define PERSISTENT_SERVER
 
+#define PORTNUM 54367 // can be changed later if we want to specify different port numbers every time
+
 //#include A threading library
 //#include Our socket connection library
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+
 #include "Lobby.h"
+#include "SocketConnection.h"
 
 class PersistentServer {
 
