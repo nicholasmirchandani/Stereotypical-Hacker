@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 
-	SocketConnection* listener = new SocketConnection();
+	SocketConnection* listener = new SocketConnection(50000);
 	SocketConnection** clients = new SocketConnection*[2];
 
 	clients[0] = listener->GetClientConnection();
