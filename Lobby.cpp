@@ -49,14 +49,13 @@ void Lobby::AddPlayer(SocketConnection client, bool isHost) {
 
 	Player p = new Player(client, isHost, "SomeGeneratedDisplayName");
 	PlayersInLobby.push_back(p);
-	//std::thread clientThread(ClientListener, client, isHost);
+	std::thread clientThread(ClientListener, client, isHost);
 	playerCount++;
-
 }
 
 void Lobby::ClientListener(SocketConnection client, bool isHost) {
 
-	while (clientThread && /*Client is connected*/) {
+	while (/*Client is connected*/) {
 		string command = input from client;
 		switch (commmand) {
 			go through normal command palette;
