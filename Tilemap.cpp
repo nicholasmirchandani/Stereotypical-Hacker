@@ -9,8 +9,6 @@
 
 
 #include "Tilemap.h"
-#include <iostream>
-
 
 
 
@@ -47,12 +45,15 @@ void Tilemap::setChar(int atX, int atY, char newChar) {
 }
 
 void Tilemap::setChar(int atX, int atY, char newChar, int fg, int bg) {
-	map[atX][atY]->setChr(newChar);
-	map[atX][atY]->setFg(fg);
-	map[atX][atY]->setBg(bg);
+	map[atY][atX]->setChr(newChar);
+	map[atY][atX]->setFg(fg);
+	map[atY][atX]->setBg(bg);
 	
 }
 
+char Tilemap::getChar(int atX, int atY) {
+	return map[atY][atX]->getChr();
+}
 
 
 void Tilemap::initializeMap(char initChar) {
@@ -69,7 +70,7 @@ void Tilemap::initializeMap(char initChar) {
 
 
 
-void Tilemap::updateTerminal() {	
+void Tilemap::updateTerminal() {
 	cout << "\033[H";	// cursorhome; Move cursor to upper left corner
 	for(int i = 0; i < y; ++i) {
 		for(int j = 0; j < x; ++j) {
@@ -78,14 +79,15 @@ void Tilemap::updateTerminal() {
 			cout << map[i][j]->getChr();
 		}
 		if(i != y-1) {
-			cout << "\n";	// nextline NEL; Move to next line
+			cout << "\n";
 		}
+		cout << flush;
 	}
 	
+	//cout << flush;
+
 	cout << "\033[38;5;255m";	// Reset foreground color (white)
 	cout << "\033[48;5;0m";	// Reset background color (black)
-
-	cout << flush;
 }
 
 void Tilemap::fillMap(char newChar) {
@@ -108,6 +110,14 @@ void Tilemap::fillBg(int newBg) {
 	for(int i = 0; i < y; ++i) {
 		for(int j = 0; j < x; ++j) {
 			map[i][j]->setBg(newBg);
+		}
+	}
+}
+
+void Tilemap::writeString(int atX, int atY, string str) {
+	for(int i = 0; i < str.size(); ++i) {
+		if(atX + i <= x) {
+			setChar(atX + i, atY, str[i]);
 		}
 	}
 }

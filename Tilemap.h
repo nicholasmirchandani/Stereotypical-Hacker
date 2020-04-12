@@ -5,6 +5,8 @@
 // 03/21/2020
 
 #include "Tile.h"
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -25,6 +27,7 @@ class Tilemap {
 		void fillFg(int newFg);
 		void fillBg(int newBg);
 		
+		void writeString(int atX, int atY, string str);
 		void drawBox(int atX, int atY, int wi, int hi, bool hollow, char newChar, int fg, int bg);
 	
 	private:
