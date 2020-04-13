@@ -189,6 +189,7 @@ SocketConnection* SocketConnection::GetClientConnection() {
 
 void SocketConnection::KillConnection() {
 	shutdown(socketFD, SHUT_RDWR);
+	isAlive = false;
 	close(socketFD);
 }
 
