@@ -1,6 +1,7 @@
 #include <iostream>
 #include <errno.h>
 #include "SocketConnection.h"
+#include "reading_failure.h"
 
 using namespace std;
 
@@ -19,6 +20,14 @@ int main(int argc, char** argv) {
 
 	clients[0]->WriteToStream((void*)message, 50);
 	cout << "Message sent" << endl;
+
+	try {
+		clients[0]->ReadFromStream(50);
+	} catch (reading_failure e) {
+		if (!clients[0]->IsAlive()) {
+			cout << "He's dead, Jim" << endl;
+		}		
+	}
 
 	return 0;
 
