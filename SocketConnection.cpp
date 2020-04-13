@@ -133,7 +133,6 @@ void SocketConnection::WriteToStream(void* Data, int len) { // Note to self: may
 
 	if (send(socketFD, Data, len, 0) == -1) {
 		fprintf(stderr, "Error: message failed to send\n%s\n", strerror(errno));
-		isAlive = false;
 		throw sending_failure("Data failed to send");	
 	}
 
@@ -152,9 +151,14 @@ void* SocketConnection::ReadFromStream(int len) {
 	}
 
 	char* dest = new char[len];
-	if (read(socketFD, (void*)dest, len) == -1) {
+	int res = read(socketFD, (void*)dest, len);
+	if (res == -1) {
 		fprintf(stderr, "Error: message failed to send\n%s", strerror(errno));
 		throw reading_failure("Data failed to be read");
+	} else if (res == 0) {
+		fprintf(stderr, "Error when reading: Client connection closed\n");
+		isAlive = false;
+		throw reading_failure("Client connection closed");
 	}
 
 	return (void*)dest;

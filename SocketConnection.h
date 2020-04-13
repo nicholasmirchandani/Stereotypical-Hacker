@@ -81,7 +81,7 @@ class SocketConnection {
 		
 		void KillConnection();
 
-		bool isAlive();
+		bool IsAlive();
 		
 		// std::string GetDestIP();
 		// std::string GetSourceIP();
