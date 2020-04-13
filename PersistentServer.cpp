@@ -93,6 +93,8 @@ void PersistentServer::AddLobby(client) {
 	char fourth = rand() % 26 + 65;
 
 	string roomCode = first + second + third + fourth;
+
+	string roomCode = "" + first + second + third + fourth;
 	LobbyCodesAndLobbies[RoomCode] = new Lobby(RoomCode, MaxPlayersPerLobby, Client);
 
 	send "Lobby created with Room Code [RoomCode]" to client;

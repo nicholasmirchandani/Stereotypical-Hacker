@@ -9,7 +9,7 @@
 #ifndef LOBBY
 #define LOBBY
 
-//#include Our socket connection library
+#include "SocketConnection.h"
 #include "Player.h"
 
 class Lobby {
@@ -23,7 +23,6 @@ class Lobby {
 		bool GameActive; // Used to handle clients joining mid-game
 
 		std::list<Player> PlayersInLobby; // A list of clients in the lobby
-		//ThreadID LobbyThread;
 
 	public:
 		Lobby(string RoomCode, int MaxPlayers, Player host);
@@ -32,8 +31,8 @@ class Lobby {
 		void LobbyLoop(); // Started in new thread in constructor.
 		void RunGame();
 
-		void AddPlayer(Socket client, bool isHost);
-		void ClientListener(Socket client, bool isHost);
+		void AddPlayer(SocketConnection client, bool isHost);
+		void ClientListener(SocketConnection client, bool isHost);
 
 
 };

@@ -9,12 +9,12 @@
 class Player {
 
  private:
- 	SocketConnection; // Represented in "Client" variable in other classes.
+ 	SocketConnection socket; // Represented in "Client" variable in other classes.
  	bool isHost;
  	string displayName;
 
  public:
- 	Player(SocketConnection, bool isHost, string displayName);
+ 	Player(SocketConnection client, bool isHost, string displayName);
  	~Player();
 
  	changeName(string newName);
