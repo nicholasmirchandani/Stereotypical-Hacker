@@ -53,7 +53,9 @@ SocketConnection::SocketConnection(int pn) {
 	if (listen(socketFD, 5) == -1) {
 		fprintf(stderr, "Error: socket listening failed\n%s", strerror(errno));
 		return;
-		}
+	}
+
+	isAlive = true;
 
 }
 
@@ -68,6 +70,7 @@ SocketConnection::SocketConnection(int fd, struct sockaddr_in localAddr, struct 
 	localAddressInfo = localAddr;
 	peerAddressInfo = peerAddr;
 	mode = 's'; // For "server-side"
+	isAlive = true;
 
 }
 
@@ -108,6 +111,8 @@ SocketConnection::SocketConnection(char* serverIP, int pn) {
 		return;
 	}
 
+	isAlive = true;
+
 }
 
 SocketConnection::~SocketConnection() {
@@ -127,7 +132,8 @@ void SocketConnection::WriteToStream(void* Data, int len) { // Note to self: may
 	}
 
 	if (send(socketFD, Data, len, 0) == -1) {
-		fprintf(stderr, "Error: message failed to send\n%s", strerror(errno));
+		fprintf(stderr, "Error: message failed to send\n%s\n", strerror(errno));
+		isAlive = false;
 		throw sending_failure("Data failed to send");	
 	}
 
@@ -180,4 +186,8 @@ SocketConnection* SocketConnection::GetClientConnection() {
 void SocketConnection::KillConnection() {
 	shutdown(socketFD, SHUT_RDWR);
 	close(socketFD);
+}
+
+bool SocketConnection::IsAlive() {
+	return isAlive;
 }

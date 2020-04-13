@@ -25,9 +25,14 @@
 class SocketConnection {
 	
 	private:
+		
 		int socketFD;
 		int portnum;
+		
 		char mode; // EG Server or Client
+
+		bool isAlive;
+		
 		struct sockaddr_in localAddressInfo; // getsockname() stuff, contains local IP and Port number
 		struct sockaddr_in peerAddressInfo; // getpeername() stuff
 
@@ -75,10 +80,11 @@ class SocketConnection {
 
 		
 		void KillConnection();
+
+		bool isAlive();
 		
 		// std::string GetDestIP();
 		// std::string GetSourceIP();
-		// bool GetConnectionStatus();
 
 };
 
