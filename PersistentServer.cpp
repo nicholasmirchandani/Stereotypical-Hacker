@@ -8,6 +8,7 @@
 
 #include "PersistentServer.h"
 #include "SocketConnection.h"
+#include "reading_failure.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -45,8 +46,10 @@ void PersistentServer::ClientConnector() {
 
 	SocketConnection* listeningSocket = new SocketConnection(PORTNUM);
 
-	char toClient[256];
-	char fromClient[256];
+	char toClient[256]; // char buffer for sending data to clients
+	char fromClient[256]; // char buffer for reading data from clients
+	char* args[25]; // char* buffer for splitting data on spaces
+	char* tok;
 
 	while(ThreadContinue) {
 
@@ -54,26 +57,63 @@ void PersistentServer::ClientConnector() {
 		strcpy(toClient, "Connected to Server");
 		client->WriteToStream((void*)msgToClient, strlen(toClient));
 
-		strcpy(fromClient, (char*)client->ReadFromStream(256)); // Potential issue if the message received from client doesn't have a terminating null character
-		// continue from here, lloyd
+		// Maybe delegate reading/splitting data to a function
+		try {
+			strcpy(fromClient, (char*)client->ReadFromStream(256)); // Potential issue if the message received from client doesn't have a terminating null character
+		} catch (reading_failure e) {
+			client->KillConnection();
+			continue;
+		}
+
+		tok = strtok(fromClient, " ");
+		if (tok == NULL) { // empty message
+			client->KillConnection();
+			continue
+		} else {
+			int i = 0;
+			while (tok != NULL && i < 25) {
+				args[i] = tok;
+				tok = strtok(fromClient, " ");
+				++i;
+			}
+		}
 
 		if (args[0] == "NEWLOBBY") {
+			
 			if (ActiveLobbies.count < LobbyNumberLimit) {
 				AddLobby(client);
 			} else {
-				Send "Server full" to client;
-				kill client;
+				strcpy(toClient, "ERR SERVERFULL");
+				client->WriteToStream((void*)msgToClient, strlen(toClient));
+				client->KillConnection();
+				continue;
 			}
+
 		} else if (args[0] == "JOINLOBBY") {
-			if (args[1] not in LobbyCodesAndLobbies) {
-				send "No Lobby with [RequestedRoomCode] found" to client;
-				kill client;
+			
+			std::map<RoomCode, Lobby>::iterator iter = LobbyCodesAndLobbies.find(args[1]);
+
+			if (iter == LobbyCodesAndLobbies.end()) {
+				strcpy(toClient, "ERR BADROOMCODE");
+				client->WriteToStream((void*)toClient, strlen(toClient));
+				client->KillConnection();
+				continue;
 			} else if (LobbyCodesAndLobbies[args[1]].PlayerCount() == MaxPlayersPerLobby){
-				send "Lobby Full" to client;
-				kill client;
+				strcpy(toClient, "ERR LOBBYFULL");
+				client->WriteToStream((void*)toClient, strlen(toClient));
+				client->KillConnection();
+				continue;
 			} else {
+				strcpy(toClient, "OK");
+				client->WriteToStream((void*)toClient, strlen(toClient));
 				LobbyCodesAndLobbies[args[1]].AddPlayer(client, false);
 			}
+
+		} else { // Invalid message from client
+
+			client->KillConnection();
+			continue;
+
 		}
 
 	}
@@ -84,20 +124,22 @@ void PersistentServer::ClientConnector() {
 
 }
 
-void PersistentServer::AddLobby(client) {
+void PersistentServer::AddLobby(SocketConnection* client) {
 
 	srand(time(NULL));
-	char first = rand() % 26 + 65;
-	char second = rand() % 26 + 65;
-	char third = rand() % 26 + 65;
-	char fourth = rand() % 26 + 65;
 
-	string roomCode = first + second + third + fourth;
+	char* roomCode = new char[4];
+	roomCode[0] = rand() % 26 + 65;
+	roomCode[1] = rand() % 26 + 65;
+	roomCode[2] = rand() % 26 + 65;
+	roomCode[3] = rand() % 26 + 65;
 
-	string roomCode = "" + first + second + third + fourth;
-	LobbyCodesAndLobbies[RoomCode] = new Lobby(RoomCode, MaxPlayersPerLobby, Client);
+	LobbyCodesAndLobbies[roomCode] = new Lobby(roomCode, MaxPlayersPerLobby, client);
 
-	send "Lobby created with Room Code [RoomCode]" to client;
-	add client to LobbyCodesAndLobbies;
+	char* toClient = new char[256];
+	strcpy(toClient, "OK ");
+	strcat(toClient, roomCode);
+	client->WriteToStream((void*)toClient, strlen(toClient));
+	LobbyCodesAndLobbies[roomCode].AddPlayer(client, true);
 
 }

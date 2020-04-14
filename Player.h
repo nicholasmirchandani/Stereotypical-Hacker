@@ -6,20 +6,34 @@
  *  lobby privilege and display name.
  */
 
+#include "SocketConnection.h"
+#include <stdio.h>
+#include <string.h>
+#include <cstdlib>
+
 class Player {
 
  private:
- 	SocketConnection socket; // Represented in "Client" variable in other classes.
+ 	SocketConnection* socket; // Represented in "Client" variable in other classes.
+ 	std::string displayName;
+
  	bool isHost;
- 	string displayName;
+ 	bool isAlive;
 
  public:
- 	Player(SocketConnection client, bool isHost, string displayName);
+ 	Player(SocketConnection* client, bool isHost, std::string displayName);
  	~Player();
 
- 	changeName(string newName);
- 	SendToPlayer();
- 	// etc
+ 	void changeName(std::string newName);
+ 	void SendToPlayer(char* toPlayer);
+ 	char** ReadFromPlayer(); // returns an array of words sent from client
+
+ 	void KillPlayer();
+
+ 	void SwapHost();
+
+ 	bool IsHost();
+ 	bool IsAlive();
 
 };
 

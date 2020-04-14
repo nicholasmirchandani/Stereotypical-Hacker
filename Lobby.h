@@ -22,17 +22,23 @@ class Lobby {
 
 		bool GameActive; // Used to handle clients joining mid-game
 
-		std::list<Player> PlayersInLobby; // A list of clients in the lobby
+		std::list<Player*> PlayersInLobby; // A list of clients in the lobby
+
+		bool lobbyStillAlive = true;
 
 	public:
-		Lobby(string RoomCode, int MaxPlayers, Player host);
+		Lobby(string RoomCode, int MaxPlayers, SocketConnection* host);
 		~Lobby();
 
 		void LobbyLoop(); // Started in new thread in constructor.
 		void RunGame();
 
-		void AddPlayer(SocketConnection client, bool isHost);
-		void ClientListener(SocketConnection client, bool isHost);
+		void AddPlayer(SocketConnection* client, bool isHost);
+		void ClientListener(SocketConnection* client, bool isHost);
+
+		void KillLobby();
+
+		bool IsActive();
 
 
 };
