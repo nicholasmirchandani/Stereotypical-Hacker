@@ -20,6 +20,9 @@ class Player {
  	bool isHost;
  	bool isAlive;
 
+ 	Directory* cwd;
+ 	char privilege;
+
  public:
  	Player(SocketConnection* client, bool isHost, std::string displayName);
  	~Player();
