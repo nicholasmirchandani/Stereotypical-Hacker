@@ -2,6 +2,7 @@
 #include <string>
 #include <stdio.h>
 //Networking Includes!
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
@@ -38,10 +39,10 @@ int main() {
             userInput = getchar();
         }
         //Sending server message about character user entered
-        //Step 4: Send data to the server
-        char* message = "Character entered:  ";
+        //Step 4: Send data to the server, using c strings because c sockets
+        char* message = "Character entered:  ".cstring();
         message[strlen(message)] = userInput;
-        write(sockfd, buffer1, strlen(buffer1));
+        write(sockfd, message, strlen(message));
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
     // Step 5: Close the connection
