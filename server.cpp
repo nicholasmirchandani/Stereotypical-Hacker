@@ -41,10 +41,15 @@ void playGame(int p1Socket, int p2Socket) {
     int p1Index = 0;
     int p2Index = 0;
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
-    std::thread listenP1(listenPlayer, p1, &p1Index, targetSentence);
-    std::thread listenP2(listenPlayer, p2, &p2Index, targetSentence);
-    listenP1.join();
-    listenP2.join();
+    bool gameOver = false;
+    std::thread listenP1(listenPlayer, p1, &p1Index, targetSentence, &gameOver);
+    std::thread listenP2(listenPlayer, p2, &p2Index, targetSentence, &gameOver);
+    
+    while(!gameOver); //Spinlocking on gameOver
+
+    //Killing the threads instead of joining them, since when one of them finishes the spinlock will free up.
+    listenP1.terminate();
+    listenP2.terminate();
     if (p1Index > p2Index) {
         std::cout << "\rPlayer 1 wins!" << std::endl;
     } else if (p2Index > p1Index) {
@@ -56,15 +61,18 @@ void playGame(int p1Socket, int p2Socket) {
 
 
 //NOTE: This is insecure, poorly coded, and easily exploitable, as you can just flood the server with whatever you want atm.  Goal is to actually check packet contents eventually.
-void listenPlayer(int playerSocket, int* index, std::string targetSentence) {
+void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool* gameOver) {
     char buffer[100];
     //Check if either player has 'won' every step of the way by checking if the value of the index is > the length of targetSentence
-    while(*index < targetSentence.length()) {
+    while(!(*gameOver)) {
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Sets buffer to 0 at all locations, clearing it before each read
         int len = read(p1Socket, buffer, 100);
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         *index = *index + 1; //Incrementing index whenever a packet is received.
+        if(*index >= targetSentence.length()) {
+            *gameOver = true;
+        }
     }
 }
