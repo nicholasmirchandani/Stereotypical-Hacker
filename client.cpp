@@ -1,6 +1,11 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
+//Networking Includes!
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
+#include <cstring> //for strlen
 
 //https://www.tutorialspoint.com/Read-a-character-from-standard-input-without-waiting-for-a-newline-in-Cplusplus
 
@@ -34,7 +39,8 @@ int main() {
         }
         //Sending server message about character user entered
         //Step 4: Send data to the server
-        char* message = "Character entered: " + userInput;
+        char* message = "Character entered:  ";
+        message[strlen(message)] = userInput;
         write(sockfd, buffer1, strlen(buffer1));
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
