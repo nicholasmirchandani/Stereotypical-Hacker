@@ -58,8 +58,9 @@ void playGame(int p1Socket, int p2Socket) {
     while(!gameOver); //Spinlocking on gameOver
 
     //Killing the threads instead of joining them, since when one of them finishes the spinlock will free up.
-    listenP1.terminate();
-    listenP2.terminate();
+    //NOTE: Joining because thread termination isn't a thing
+    listenP1.join();
+    listenP2.join();
     if (p1Index > p2Index) {
         std::cout << "\rPlayer 1 wins!" << std::endl;
     } else if (p2Index > p1Index) {
