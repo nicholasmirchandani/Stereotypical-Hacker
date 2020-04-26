@@ -1,2 +1,1 @@
-# Stereotypical-Hacker
-Stereotypical Hacker - Mainframe Access Token
+Usernames and passwords from www.github.com/danielmiessler/SecLists

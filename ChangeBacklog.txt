@@ -1,0 +1,7 @@
+Update Player.cpp to make display name a char* instead of a string
+Update Player class to have current virtual server member called cvs
+
+update Lobby.cpp to pass in number of virtual servers and pointer to player list as parameters.
+	Number of virtual servers >= number of players
+
+Client side: recognize valid commands, only send through valid ones (including number of arguments per command)
