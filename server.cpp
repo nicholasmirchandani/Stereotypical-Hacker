@@ -2,6 +2,7 @@
 #include <string>
 #include <thread> //for std::thread
 #include <exception> //for std::terminate
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
