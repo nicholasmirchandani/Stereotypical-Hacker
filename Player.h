@@ -7,6 +7,8 @@
  */
 
 #include "SocketConnection.h"
+#include "Directory.h"
+#include "VirtualServer.h"
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
@@ -15,19 +17,20 @@ class Player {
 
  private:
  	SocketConnection* socket; // Represented in "Client" variable in other classes.
- 	std::string displayName;
+ 	char* displayName;
 
  	bool isHost;
  	bool isAlive;
 
- 	Directory* cwd;
- 	char privilege;
-
  public:
- 	Player(SocketConnection* client, bool isHost, std::string displayName);
+ 	Directory* cwd; // current working directory
+ 	VirtualServer* cvs; // current virtual server
+ 	int score;
+
+ 	Player(SocketConnection* client, bool isHost, char* displayName);
  	~Player();
 
- 	void changeName(std::string newName);
+ 	void changeName(char* newName);
  	void SendToPlayer(char* toPlayer);
  	char** ReadFromPlayer(); // returns an array of words sent from client
 

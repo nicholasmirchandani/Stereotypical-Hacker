@@ -10,14 +10,16 @@
 #include "SocketConnection.h"
 #include "Player.h"
 #include "Game.h"
+#include <cstdlib>
+#include <vector>
 
-Lobby::Lobby(string RoomCode, int MaxPlayers, SocketConnection* HostClient) {
+Lobby::Lobby(char* RoomCode, int MaxPlayers, SocketConnection* HostClient) {
 
-	this.RoomCode = RoomCode;
-	this.MaxPlayers = MaxPlayers;
+	this.->RoomCode = RoomCode;
+	this->MaxPlayers = MaxPlayers;
 	playerCount = 0;
 
-	PlayersInLobby = new vector<Player*>();
+	PlayersInLobby = new std::vector<Player*>();
 	AddPlayer(HostClient, true); // Keep host player at front to check for security of Lobby commands
 
 	//std::thread LobbyThread(LobbyLoop);
@@ -26,9 +28,19 @@ Lobby::Lobby(string RoomCode, int MaxPlayers, SocketConnection* HostClient) {
 
 Lobby::~Lobby() {
 
-	Stop LobbyLoop;
+	//Stop LobbyLoop
+	lobbyStillAlive = false;
 
-	Delete ClientsInLobby;
+	// Delete clients in lobby
+	for (int i = PlayersInLobby->size()-1; i > -1 ; --i) {
+
+		PlayersInLobby->at(i)->KillPlayer();
+		PlayersInLobby->erase(i);
+
+	}
+
+	PlayersInLobby = NULL;
+	delete PlayersInLobby;
 
 }
 
@@ -46,7 +58,7 @@ void Lobby::RunGame() {
 
 	// Kick off the game logic here.
 	gameActive = true;
-	game = new Game();
+	game = new Game(MaxPlayers + 3, PlayersInLobby);
 
 }
 
@@ -65,11 +77,15 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 	while (player->IsAlive()) {
 		args = player->ReadFromPlayer();
 
-		if (gameActive) { // non-game commands
+		if (gameActive) { // game commands
+
+			if (strcmp(args[0], (char*)"ls") || strcmp(args[0], (char*)"ls\n")) {
+				game->LS(player, args); 
+			} // And so on for read, exec, cap, pwd, cd, ssh, and help
 			
 		}
 
-		else if (!gameActive) { // Game commands
+		else if (!gameActive) { // non-game commands
 			switch (args[0]) {
 				go through normal command palette;
 				default:

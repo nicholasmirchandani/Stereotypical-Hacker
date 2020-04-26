@@ -18,7 +18,7 @@ class Lobby {
 	private:
 
 		int MaxPlayers;
-		string RoomCode;
+		char* RoomCode;
 		int playerCount;
 
 		bool gameActive; // Used to handle clients joining mid-game
@@ -29,7 +29,7 @@ class Lobby {
 		bool lobbyStillAlive = true;
 
 	public:
-		Lobby(string RoomCode, int MaxPlayers, SocketConnection* host);
+		Lobby(char* RoomCode, int MaxPlayers, SocketConnection* host);
 		~Lobby();
 
 		void LobbyLoop(); // Started in new thread in constructor.

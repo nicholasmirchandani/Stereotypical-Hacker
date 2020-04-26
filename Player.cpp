@@ -2,12 +2,13 @@
 #include "SocketConnection.h"
 #include "reading_failure.h"
 
-Player::Player(SocketConnection* client, bool isHost, string displayName)
+Player::Player(SocketConnection* client, bool isHost, char* displayName)
 {
-  this.isHost = isHost;
-  this.displayName = displayName;
+  this->isHost = isHost;
+  this->displayName = displayName;
   socket = client;
   isAlive = true;
+  this->score = 0;
 }
 
 Player::~Player()
@@ -15,7 +16,7 @@ Player::~Player()
 	this->KillPlayer();
 }
 
-void Player::changeName(string newName)
+void Player::changeName(char* newName)
 {
 	displayName = newName;
 }
