@@ -2,10 +2,14 @@
 #include <string>
 #include <thread> //for std::thread
 #include <exception> //for std::terminate
+//Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
+
+void playGame(int p1Socket, int p2Socket);
+void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool* gameOver);
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
@@ -72,7 +76,9 @@ void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool
     while(!(*gameOver)) {
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
-        memset(buffer, 0, sizeof(buffer)); //Sets buffer to 0 at all locations, clearing it before each read
+        for(int i = 0; i < 100; ++i) {
+            buffer[i] = 0; //Clearing buffer before each read
+        }
         int len = read(playerSocket, buffer, 100);
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         *index = *index + 1; //Incrementing index whenever a packet is received.
