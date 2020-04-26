@@ -27,24 +27,32 @@ void Player::SendToPlayer(char* toPlayer) {
 
 }
 
+// Converts input from a socket stream into a char*, denoting strings within single quotes as one argument
 char** Player::ReadFromPlayer() {
 
-	char* fromClient = new char[256];
+	char* fromClient = new char[500];
 	char* args[25];
 	char* tok;
 
 	try {
 		
 		strcpy(fromClient, socket->ReadFromStream());
-
-		tok = strtok(fromClient, " ");
-		int i = 0;
-		while (tok != NULL && i < 25) {
-			args[i] = tok;
-			tok = strtok(fromClient, " ");
-			++i;
-		}
 		
+		tok = strtok(fromClient, " ");
+		int i  = 0;
+		while (tok != NULL && i < 25) {
+			if (tok[0] == '\'') {
+				char temptok[450];
+				strcat(temptok, &tok[1]);
+				strcat(temptok, " ");
+				strcat(temptok, strtok(NULL, "'"));
+				tok = temptok;
+			} else {
+				arr[i++] = tok;
+				tok = strtok(NULL, " ");
+			}
+		}
+
 		return args;
 
 	} catch (reading_failure e) {

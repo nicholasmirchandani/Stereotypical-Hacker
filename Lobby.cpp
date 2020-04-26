@@ -48,6 +48,11 @@ void Lobby::LobbyLoop() {
 
 	while(ThreadContinue && PlayerCount > 0) {
 
+		if (gameActive && game->serversRemaining == 0) {
+			gameActive = false;
+			//Determine winners and send message to 
+		}
+
 		// Flexible space to be used however.
 
 	}
@@ -57,8 +62,12 @@ void Lobby::LobbyLoop() {
 void Lobby::RunGame() {
 
 	// Kick off the game logic here.
+	for (Player* p : PlayersInLobby) {
+		p->SendToPlayer((char*)"GAME STARTING");
+	}
 	gameActive = true;
 	game = new Game(MaxPlayers + 3, PlayersInLobby);
+	// Maybe put a little bit of a break here
 
 }
 
@@ -81,20 +90,52 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 			if (strcmp(args[0], (char*)"ls") || strcmp(args[0], (char*)"ls\n")) {
 				game->LS(player, args); 
-			} // And so on for read, exec, cap, pwd, cd, ssh, and help
+			} else if (strcmp(args[0], (char*)"read") || strcmp(args[0], (char*)"read\n")) {
+				game->READ(player, args);
+			} else if (strcmp(args[0], (char*)"exec") || strcmp(args[0], (char*)"exec\n")) {
+				game->EXEC(player, args);
+			} else if (strcmp(args[0], (char*)"cap") || strcmp(args[0], (char*)"cap\n")) {
+				game->CAP(player, args);
+			} else if (strcmp(args[0], (char*)"pwd") || strcmp(args[0], (char*)"pwd\n")) {
+				game->PWD(player);
+			} else if (strcmp(args[0], (char*)"cd") || strcmp(args[0], (char*)"cd\n")) {
+				game->CD(player, args);
+			} else if (strcmp(args[0], (char*)"ssh") || strcmp(args[0], (char*)"ssh\n")) {
+				game->SSH(player, args);
+			} else if (strcmp(args[0], (char*)"help") || strcmp(args[0], (char*)"help\n")) {
+				game->HELP(player);
+			}
 			
 		}
 
 		else if (!gameActive) { // non-game commands
-			switch (args[0]) {
-				go through normal command palette;
-				default:
-					if (isHost) {
-						switch (args[0]) {
-							go through host command palette;
-						}
-					}
+			
+			if (strcmp(args[0], (char*)"rename") || strcmp(args[0], (char*)"rename\n")) {
+				p->displayName = args[1];
+			} else if (strcmp(args[0], (char*)"chat") || strcmp(args[0], (char*)"chat\n") {
+				for (Player* p : PlayersInLobby) {
+					string temp = "";
+					temp += p->displayName;
+					temp += " - ";
+					temp += args[1]; // Needs some way to keep words within quotes as one char* (from ReadFromPlayer)
+					
+					char* toPlayer = new char[temp.size()+1];
+					copy(temp.begin(), temp.end(), toPlayer);
+					toPlayer[temp.size()] = '\0';
+
+					p->SendToPlayer(toPlayer);
+
+				}
+			} // more in game commands
+
+			else if (player->IsHost()) { // host commands
+
+				if (strcmp(args[0], (char*)"rungame") || strcmp(args[0], (char*)"rungame\n")) {
+					RunGame();
+				}
+
 			}
+
 		}
 	}
 
