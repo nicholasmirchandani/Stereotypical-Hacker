@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
-#include <thread> // for std::thread
+#include <thread> //for std::thread
+#include <exception> //for std::terminate
+#include <sys/socket.h>
+#include <netinet/ip.h>
+#include <arpa/inet.h>
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
@@ -42,8 +46,8 @@ void playGame(int p1Socket, int p2Socket) {
     int p2Index = 0;
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
     bool gameOver = false;
-    std::thread listenP1(listenPlayer, p1, &p1Index, targetSentence, &gameOver);
-    std::thread listenP2(listenPlayer, p2, &p2Index, targetSentence, &gameOver);
+    std::thread listenP1(listenPlayer, p1Index, &p1Index, targetSentence, &gameOver);
+    std::thread listenP2(listenPlayer, p2Index, &p2Index, targetSentence, &gameOver);
     
     while(!gameOver); //Spinlocking on gameOver
 
