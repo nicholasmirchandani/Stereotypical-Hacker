@@ -35,7 +35,7 @@ int main() {
 
     // Step 6: Close the connections
     close(p2Socket);
-    close(p1Socket) 
+    close(p1Socket);
     close(listeningSocket);
     return 0;
 }
@@ -73,7 +73,7 @@ void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Sets buffer to 0 at all locations, clearing it before each read
-        int len = read(p1Socket, buffer, 100);
+        int len = read(playerSocket, buffer, 100);
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         *index = *index + 1; //Incrementing index whenever a packet is received.
         if(*index >= targetSentence.length()) {
