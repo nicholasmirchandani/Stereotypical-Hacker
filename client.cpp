@@ -42,7 +42,7 @@ int main() {
         //Step 4: Send data to the server, using c strings because c sockets
         std::string message = "Character entered: " + userInput;
         const char* messageToSend = message.c_str();
-        write(sockfd, message, strlen(messageToSend));
+        write(sockfd, messageToSend, strlen(messageToSend));
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
     // Step 5: Close the connection
