@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring> //for memset
 #include <thread> //for std::thread
 #include <exception> //for std::terminate
 //Networking Includes!
@@ -30,7 +31,7 @@ int main() {
     listen(listeningSocket, 5);
 
     // Step 4: Accept 2 connection requests
-    int client_len = sizeof(struct sockaddr_in);
+    unsigned int client_len = sizeof(struct sockaddr_in);
     p1Socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
     p2Socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
 
@@ -76,9 +77,7 @@ void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool
     while(!(*gameOver)) {
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
-        for(int i = 0; i < 100; ++i) {
-            buffer[i] = 0; //Clearing buffer before each read
-        }
+        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(playerSocket, buffer, 100);
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         *index = *index + 1; //Incrementing index whenever a packet is received.
