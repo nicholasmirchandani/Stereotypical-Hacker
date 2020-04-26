@@ -30,8 +30,10 @@ int main() {
     std::string targetSentence = "This is a test sentence.";
     bool isPlayer1 = true;
     char userInput = 0;
+    //TODO: Have this receive "terminate" packets to allow the server to asynchronously terminate
     for(int i = 0; i < targetSentence.length(); ++i) {
         while(targetSentence[i] != userInput) {
+            //TODO: Check for server terminate here
             //Alternating the terminal between "cooked" (To output as usual) and "raw" (To take individual characters as inputs)
             system("stty cooked");
             std::cout << "\rPlayer " << (isPlayer1 ? "1" : "2" ) << ": Please enter the character: " << targetSentence[i] << '\n'; //DEBUG: Will be replaced by Logan tilemap code once that's up and running.

@@ -78,7 +78,7 @@ void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-        int len = read(playerSocket, buffer, 100); //TODO: Change this to be cancellable, so server thread doesn't block waiting for user input
+        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         *index = *index + 1; //Incrementing index whenever a packet is received.
         if(*index >= targetSentence.length()) {
