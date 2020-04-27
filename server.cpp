@@ -47,7 +47,7 @@ int main() {
 
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 void playGame(int p1Socket, int p2Socket) {
-    std::string targetSentence = "This is a test sentence.";
+    std::string targetSentence = "This is a new test sentence.";
     int p1Index = 0;
     int p2Index = 0;
     const char* messageToSend = targetSentence.c_str();
