@@ -52,8 +52,8 @@ void playGame(int p1Socket, int p2Socket) {
     int p2Index = 0;
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
     bool gameOver = false;
-    std::thread listenP1(listenPlayer, p1Index, &p1Index, targetSentence, &gameOver);
-    std::thread listenP2(listenPlayer, p2Index, &p2Index, targetSentence, &gameOver);
+    std::thread listenP1(listenPlayer, p1Socket, p2Socket, &p1Index, targetSentence, &gameOver);
+    std::thread listenP2(listenPlayer, p2Socket, p1Socket, &p2Index, targetSentence, &gameOver);
     
     while(!gameOver); //Spinlocking on gameOver
 
@@ -72,7 +72,7 @@ void playGame(int p1Socket, int p2Socket) {
 
 
 //NOTE: This is insecure, poorly coded, and easily exploitable, as you can just flood the server with whatever you want atm.  Goal is to actually check packet contents eventually.
-void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool* gameOver) {
+void listenPlayer(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver) {
     char buffer[100];
     //Check if either player has 'won' every step of the way by checking if the value of the index is > the length of targetSentence
     while(!(*gameOver)) {
@@ -81,9 +81,18 @@ void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
+        if(len == 3) {
+            break; //If len is 3, it's just 'ACK' to a 'FIN'
+        }
         *index = *index + 1; //Incrementing index whenever a packet is received.
         if(*index >= targetSentence.length()) {
             *gameOver = true;
+            buffer[0] = 'F';
+            buffer[1] = 'I';
+            buffer[2] = 'N';
+            //Sending FIN to both players to ensure they both exit their threads
+            write(playerSocket, buffer, 3);
+            write(otherSocket, buffer, 3);
         }
     }
 }
