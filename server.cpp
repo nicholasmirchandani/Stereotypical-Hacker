@@ -50,6 +50,9 @@ void playGame(int p1Socket, int p2Socket) {
     std::string targetSentence = "This is a test sentence.";
     int p1Index = 0;
     int p2Index = 0;
+    const char* messageToSend = targetSentence.c_str();
+    write(p1Socket, messageToSend, strlen(messageToSend));
+    write(p2Socket, messageToSend, strlen(messageToSend));
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
     bool gameOver = false;
     std::thread listenP1(listenPlayer, p1Socket, p2Socket, &p1Index, targetSentence, &gameOver);

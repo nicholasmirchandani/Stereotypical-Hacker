@@ -36,9 +36,12 @@ int main() {
 
     /*End Boilerplate network code*/
     bool gameOver = false;
+    //Read data from the connection to set targetSentence
+    memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+    int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+    printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
+    std::string targetSentence = buffer;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
-    std::string targetSentence = "This is a test sentence.";
-    bool isPlayer1 = true;
     char userInput = 0;
     //TODO: Have this receive "terminate" packets to allow the server to asynchronously terminate
     for(int i = 0; i < targetSentence.length() && !gameOver; ++i) {
@@ -49,7 +52,7 @@ int main() {
             if(gameOver) {
                 break;
             }
-            std::cout << "\rPlayer " << (isPlayer1 ? "1" : "2" ) << ": Please enter the character: " << targetSentence[i] << '\n'; //DEBUG: Will be replaced by Logan tilemap code once that's up and running.
+            std::cout << "\rPlease enter the character: " << targetSentence[i] << '\n'; //DEBUG: Will be replaced by Logan tilemap code once that's up and running.
             system("stty raw");
             userInput = getchar();
         }
