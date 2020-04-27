@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <stdio.h>
 #include <thread> //for std::thread
 //Networking Includes!
 #include <unistd.h>
@@ -8,6 +7,7 @@
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 #include <cstring> //for strlen
+#include <stdio.h>
 
 //https://www.tutorialspoint.com/Read-a-character-from-standard-input-without-waiting-for-a-newline-in-Cplusplus
 
