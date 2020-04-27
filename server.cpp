@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 
 void playGame(int p1Socket, int p2Socket);
-void listenPlayer(int playerSocket, int* index, std::string targetSentence, bool* gameOver);
+void listenPlayer(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
