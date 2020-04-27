@@ -27,9 +27,9 @@ int main() {
     dest.sin_addr.s_addr = inet_addr("10.0.2.69");  //<-- Host we're connecting to
     dest.sin_port = htons(9090); //<-- Port we're connecting to
     // Step 3: Connect to the server
-    connect(sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
+    int errorCheck = connect(sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
 
-    if(sockfd < 0) {
+    if(errorCheck < 0) {
         std::cout << "ERROR: Couldn't connect to host" << std::endl;
         exit(1);
     }
