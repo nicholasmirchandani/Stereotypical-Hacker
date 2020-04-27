@@ -24,7 +24,7 @@ int main() {
     struct sockaddr_in dest;
     memset(&dest, 0, sizeof(struct sockaddr_in));
     dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = inet_addr("10.0.2.69");  //<-- Host we're connecting to
+    dest.sin_addr.s_addr = inet_addr("127.0.0.1");  //<-- Host we're connecting to
     dest.sin_port = htons(9090); //<-- Port we're connecting to
     // Step 3: Connect to the server
     int errorCheck = connect(sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
