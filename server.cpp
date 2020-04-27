@@ -80,7 +80,8 @@ void listenPlayer(int playerSocket, int otherSocket, int* index, std::string tar
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-        printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
+        printf("Received %d bytes: %s\n", len, buffer); //Prints out receivedMessage
+        fflush(stdout);
         if(len == 3) {
             break; //If len is 3, it's just 'ACK' to a 'FIN'
         }
