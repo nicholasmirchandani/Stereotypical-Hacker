@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
+#include <thread> //for std::thread
 //Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
@@ -9,6 +10,8 @@
 #include <cstring> //for strlen
 
 //https://www.tutorialspoint.com/Read-a-character-from-standard-input-without-waiting-for-a-newline-in-Cplusplus
+
+void waitForFIN(int serverSocket, bool* gameOver);
 
 int main() {
     /*Boilerplate Network Code*/
@@ -46,7 +49,7 @@ int main() {
             userInput = getchar();
         }
         if(gameOver) {
-            break
+            break;
         }
         //Sending server message about character user entered
         //Step 4: Send data to the server, using c strings because c sockets
@@ -67,7 +70,7 @@ void waitForFIN(int serverSocket, bool* gameOver) {
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         if(len == 3) {
             *gameOver = true;
