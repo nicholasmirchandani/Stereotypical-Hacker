@@ -76,12 +76,10 @@ void waitForFIN(int serverSocket, bool* gameOver) {
     char buffer[100];
     //Check if either player has 'won' every step of the way by checking if the value of the index is > the length of targetSentence
     while(!(*gameOver)) {
-        std::cout << "Waiting for FIN!" << std::endl;
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-        printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
         if(len == 3) {
             *gameOver = true;
             buffer[0] = 'A';
