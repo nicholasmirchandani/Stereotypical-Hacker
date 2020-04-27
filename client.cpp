@@ -37,8 +37,9 @@ int main() {
     /*End Boilerplate network code*/
     bool gameOver = false;
     //Read data from the connection to set targetSentence
+    char buffer[100];
     memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-    int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+    int len = read(sockfd, buffer, 100); //Reading sentence from buffer
     printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
     std::string targetSentence = buffer;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
