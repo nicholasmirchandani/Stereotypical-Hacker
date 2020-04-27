@@ -40,7 +40,6 @@ int main() {
     char buffer[100];
     memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
     int len = read(sockfd, buffer, 100); //Reading sentence from buffer
-    printf("Received %d bytes: %s", len, buffer); //Prints out receivedMessage
     std::string targetSentence = buffer;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
     char userInput = 0;
