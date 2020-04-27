@@ -90,9 +90,10 @@ void listenPlayer(int playerSocket, int otherSocket, int* index, std::string tar
             buffer[0] = 'F';
             buffer[1] = 'I';
             buffer[2] = 'N';
+            buffer[3] = 0;
             //Sending FIN to both players to ensure they both exit their threads
-            write(playerSocket, buffer, 3);
-            write(otherSocket, buffer, 3);
+            write(playerSocket, buffer, strlen(buffer));
+            write(otherSocket, buffer, strlen(buffer));
         }
     }
 }

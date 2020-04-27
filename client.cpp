@@ -58,6 +58,7 @@ int main() {
         write(sockfd, messageToSend, strlen(messageToSend));
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
+    listenForFIN.join();
     // Step 5: Close the connection
     close(sockfd);
     return 0;
