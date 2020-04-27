@@ -112,7 +112,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 			
 			if (strcmp(args[0], (char*)"rename") || strcmp(args[0], (char*)"rename\n")) {
 				p->displayName = args[1];
-			} else if (strcmp(args[0], (char*)"chat") || strcmp(args[0], (char*)"chat\n") {
+			} else if (strcmp(args[0], (char*)"chat") || strcmp(args[0], (char*)"chat\n")) {
 				for (Player* p : PlayersInLobby) {
 					string temp = "";
 					temp += p->displayName;
@@ -126,7 +126,17 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 					p->SendToPlayer(toPlayer);
 
 				}
-			} // more in game commands
+			} else if (strcmp(args[0], (char*)"quit") || strcmp(args[0], (char*)"quit\n")) {
+				player->KillPlayer();
+			} else if (strcmp(args[0], (char*)"help") || strcmp(args[0], (char*)"help\n")) {
+				string temp = " --- LOBBY COMMANDS ---\n\n";
+				temp += "rename - Change your display name\n";
+				temp += "   Usage: rename <new-display-name>\n\n";
+				temp += "chat - Send a message to all other players in the lobby\n";
+				temp += "   Usage: chat '<message>'\n\n";
+				temp += "quit - Exit the lobby and quit the game\n";
+				temp += "   Usage: quit\n";
+			} // more lobby commands
 
 			else if (player->IsHost()) { // host commands
 
