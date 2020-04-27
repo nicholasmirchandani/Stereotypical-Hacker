@@ -29,6 +29,11 @@ int main() {
     // Step 3: Connect to the server
     connect(sockfd, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
 
+    if(sockfd < 0) {
+        std::cout << "ERROR: Couldn't connect to host" << std::endl;
+        exit(1);
+    }
+
     /*End Boilerplate network code*/
     bool gameOver = false;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
