@@ -73,8 +73,6 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 		char* hostIP = new char[15];
 		sprintf(hostIP, (char*)"192.168.1.%d", (hostnum++*4));
 		VirtualServer* serv = new VirtualServer(hostIP, rootuser, rootpass, otherusers, otherpasses, totalusers);
-		cout << "DEBUG ROOT USER: " << rootuser << endl;
-		cout << "DEBUG ROOT PASS: " << rootpass << endl;
 
 		// usr directory with usernames and little readable notes
 		Directory* usr = new Directory((char*)"usr");
