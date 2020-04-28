@@ -15,7 +15,7 @@
 #include "Directory.h"
 #include "VirtualServer.h"
 #include "VirtualFile.h"
-// #include "Player.h"
+#include "Player.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,39 +31,59 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 	activePlayers = playerList;
 	servers = new vector<VirtualServer*>();
 	serversRemaining = virtualServerNumber;
+	srand(time(NULL));
 
 	int hostnum = 1;
 
+
 	for (int servs = 0; servs < virtualServerNumber; ++servs) {
 
-		ifstream usernames;
-		usernames.open("usernames.txt");
-		ifstream passwords;
-		passwords.open("passwords.txt");
+		ifstream usernames("usernames.txt");
+		ifstream passwords("passwords.txt");
+	
+		char* rootuser;
+		char* rootpass;
 
-		char rootuser[50];
-		char rootpass[50];
-
-		char* otherusers[5];
-		char* otherpasses[5];
+		char** otherusers = new char*[10];
+		char** otherpasses = new char*[10];
 
 		int totalusers = 0;
 
-		srand(time(NULL));
+		string userpassgetter;
+
 		int userlimit = (rand()%600)+200;
 		for (int i = 0; i <= userlimit; ++i) {
-			if (totalusers < 5 && (rand()%10) == 0 && i < userlimit) {
-				usernames.getline(otherusers[totalusers], 50);
-				passwords.getline(otherpasses[totalusers++], 50);
-				continue;
+			if (totalusers < 10 && (rand()%30) == 0 && i < userlimit) {
+				
+				getline(usernames, userpassgetter);
+				otherusers[totalusers] = new char[userpassgetter.length()+1];
+				copy(userpassgetter.begin(), userpassgetter.end(), otherusers[totalusers]);
+				otherusers[totalusers][userpassgetter.length()] = '\0';
+
+				getline(usernames, userpassgetter);
+				otherpasses[totalusers] = new char[userpassgetter.length()+1];
+				copy(userpassgetter.begin(), userpassgetter.end(), otherpasses[totalusers]);
+				otherpasses[totalusers++][userpassgetter.length()] = '\0';
+				// serv->AddOther(otherusers[totalusers], otherpasses[totalusers++]);
 			}
-			usernames.getline(rootuser, 50);
-			passwords.getline(rootpass, 50);
+			getline(usernames, userpassgetter);
+			getline(passwords, userpassgetter);
 		}
+		getline(usernames, userpassgetter);
+		rootuser = new char[userpassgetter.length()+1];
+		copy(userpassgetter.begin(), userpassgetter.end(), rootuser);
+		rootuser[userpassgetter.length()] = '\0';
+		
+		getline(passwords, userpassgetter);
+		rootpass = new char[userpassgetter.length()+1];
+		copy(userpassgetter.begin(), userpassgetter.end(), rootpass);
+		rootpass[userpassgetter.length()] = '\0';
+
+		// serv->SetRoot(rootuser, rootpass);
 		usernames.close();
 		passwords.close();
 
-		char hostIP[15];
+		char* hostIP = new char[15];
 		sprintf(hostIP, (char*)"192.168.1.%d", (hostnum++*4));
 		VirtualServer* serv = new VirtualServer(hostIP, rootuser, rootpass, otherusers, otherpasses, totalusers);
 
@@ -71,28 +91,33 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 		Directory* usr = new Directory((char*)"usr");
 		serv->AddSubdir(usr);
 
-		Directory* rootuserdir = new Directory(rootuser);
+		Directory* rootuserdir = new Directory(serv->rootuser);
 		usr->AddSubdir(rootuserdir);
 
 		VirtualFile* rootuserfile = new VirtualFile('t', 'a', (char*)"notetoself.txt", (char*)"Keep your password on lock\nWouldn't want anyone getting root access\n");
 		rootuserdir->AddFile(rootuserfile);
 
+		Directory* otheruserdir;
+		VirtualFile* otheruserfile;
+		// cout << endl << totalusers << endl;
 		for (int i = 0; i < totalusers; ++i) {
 
-			Directory* otheruserdir = new Directory(otherusers[i]);
+			otheruserdir = new Directory(serv->otherusers[i]);
 			usr->AddSubdir(otheruserdir);
+			// cout << otheruserdir->name << endl;
 
-			VirtualFile* otheruserfile = new VirtualFile('t', 'a', (char*)"notetoself.txt", (char*)"Man, those security briefings are getting tedious\nIt's not like I have access to anything important\n");
+			otheruserfile = new VirtualFile('t', 'a', (char*)"notetoself.txt", (char*)"Man, those security briefings are getting tedious\nIt's not like I have access to anything important\n");
 			otheruserdir->AddFile(otheruserfile);
 
 		}
 
 		for (int i = 0; i < activePlayers->size(); ++i) {
 
-			Directory* otheruserdir = new Directory(activePlayers->at(i)->displayName);
+			otheruserdir = new Directory(activePlayers->at(i)->DisplayName());
 			usr->AddSubdir(otheruserdir);
+			// cout << otheruserdir->name << endl;
 
-			VirtualFile* otheruserfile = new VirtualFile('t', 'a', (char*)"notefromsysadmin.txt", (char*)"Filthy, no-good hacker\nBoot off server on sight\n");
+			otheruserfile = new VirtualFile('t', 'a', (char*)"notefromsysadmin.txt", (char*)"Filthy, no-good hacker\nBoot off server on sight\n");
 			otheruserdir->AddFile(otheruserfile);
 
 		}
@@ -110,21 +135,21 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 
 		// etc directory with passwd file
 		Directory* etc = new Directory((char*)"etc");
-		serv->AddSubdir(serv);
+		serv->AddSubdir(etc);
 
 		int rootplacement = rand()%(totalusers+1);
 		hash<string> strhasher;
 		string temp = "";
 		for (int i = 0; i < totalusers; ++i) {
 			if (i == rootplacement) {
-				temp += rootuser;
+				temp += serv->rootuser;
 				temp += ':';
-				temp += strhasher(string(rootpass));
+				temp += strhasher(string(serv->rootpass));
 				temp += '\n';
 			}
-			temp += otherusers[i];
+			temp += serv->otherusers[i];
 			temp += ':';
-			temp += strhasher(string(otherpasses[i]));
+			temp += strhasher(string(serv->otherpasses[i]));
 			temp += '\n';
 
 		}
@@ -141,6 +166,7 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 	for (int n = 0; n < activePlayers->size(); ++n) {
 
 		activePlayers->at(n)->cwd = servers->at(n);
+		activePlayers->at(n)->cvs = servers->at(n);
 
 	}
 
@@ -149,23 +175,35 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 // Lists directories in cwd
 void Game::LS(Player* p, char** args) {
 
-	string temp = "";
-	for (Directory* dir : p->cwd->subdirectories) {
-		temp += dir->name;
-		temp += " ";
+	string temp = "\n";
+
+	char** dirsandfiles = new char*[30];
+	int j = 0;
+
+	Directory* dir;
+	cout << p->cwd->subdirectories->size() << endl;
+	for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+		dir = *i;
+		cout << dir->name << endl;
+		dirsandfiles[j++] = dir->name;
 	}
 
-	for (VirtualFile* vir : p->cwd->files) {
-		temp += vir->name;
-		temp += " ";
+	VirtualFile* vir;
+	for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+		vir = *i;
+		dirsandfiles[j++] = vir->name;
 	}
-	temp += '\n';
 
-	char* toPlayer = new char[temp.size()+1];
-	copy(temp.begin(), temp.end(), toPlayer);
-	toPlayer[temp.size()] = '\0';
-
+	char* toPlayer = new char[200];
+	strcpy(toPlayer, (char*)"\n");
+	for (int i = 0; i < j; ++i) {
+		strcat(toPlayer, dirsandfiles[i]);
+		strcat(toPlayer, (char*)" ");
+	}
+	cout << toPlayer << endl;
 	p->SendToPlayer(toPlayer);
+
+	free(args);
 
 }
 
@@ -178,12 +216,14 @@ void Game::READ(Player* p, char** args) {
 
 	char* filename = strtok(args[1], "\n");
 
-	for (VirtualFile* vir : p->cwd->files) {
+	VirtualFile* vir;
+	for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+		vir = *i;
 		
 		if (fileFound)
 			break;
 
-		if (strcmp(vir->name, filename)) {
+		if (strcmp(vir->name, filename) == 0) {
 			fileFound = true;
 
 			if (vir->filetype == 'e') {
@@ -201,12 +241,14 @@ void Game::READ(Player* p, char** args) {
 
 	}
 
-	for (Directory* dir : p->cwd->subdirectories) {
+	Directory* dir;
+	for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+		dir = *i;
 		
 		if (fileFound)
 			break;
 		
-		if (strcmp(dir->name , filename)) {
+		if (strcmp(dir->name , filename) == 0) {
 			temp += dir->name;
 			temp += " of type Directory.\nNo text to read.\n";
 			fileFound = true;
@@ -227,6 +269,8 @@ void Game::READ(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
+	free(args);
+
 }
 
 // Executes an executable file found in <virtual-server>/bin
@@ -236,11 +280,13 @@ void Game::EXEC(Player* p, char** args) {
 
 	string temp = "";
 
-	if (strcmp((char*)"johntheripper", executable)) {
+	if (strcmp("johntheripper", executable) == 0) {
 		
 		bool fileFound = false;
 		char* filename = strtok(args[2], "\n");
-		for (VirtualFile* vir : p->cwd->files) {
+		VirtualFile* vir;
+		for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+			vir = *i;
 			
 			if (fileFound)
 				break;
@@ -249,7 +295,7 @@ void Game::EXEC(Player* p, char** args) {
 				
 				fileFound = true;
 				
-				if (strcmp(filename, (char*)"passwd")) {
+				if (strcmp(filename, "passwd") == 0) {
 					
 					temp += "DECRYPTED USERNAMES AND PASSWORDS\n";
 					
@@ -284,10 +330,12 @@ void Game::EXEC(Player* p, char** args) {
 
 		}
 
-	} else if (strcmp((char*)"pingsweep", executable)) {
+	} else if (strcmp("pingsweep", executable) == 0) {
 
 		temp += "SCANNING NETWORK\n";
-		for (VirtualServer* serv : servers) {
+		Directory* serv;
+		for (vector<VirtualServer*>::iterator i = servers->begin(); i != servers->end(); ++i) {
+			serv = *i;
 
 			temp += "Host up at IP Address ";
 			temp += serv->name;
@@ -307,13 +355,15 @@ void Game::EXEC(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
+	free(args);
+
 }
 
 // If credentials match server's root credentials, captures server
 void Game::CAP(Player* p, char** args) {
 
 	char* submitteduser = args[1];
-	char* submitteduser = strtok(args[2], "\n");
+	char* submittedpass = strtok(args[2], "\n");
 
 	string temp = "";
 
@@ -325,7 +375,7 @@ void Game::CAP(Player* p, char** args) {
 
 	if (serverroot->captured) {
 		temp += "Failed to capture server: server already captured\n";
-	} else if (strcmp(serverroot->rootuser, submitteduser) && strcmp(serverroot->rootpass, submittedpass)) {
+	} else if (strcmp(serverroot->rootuser, submitteduser) == 0 && strcmp(serverroot->rootpass, submittedpass) == 0) {
 		temp += "SERVER CAPTURE SUCCESSFUL\n";
 		serverroot->captured = true;
 		serversRemaining--;
@@ -340,10 +390,12 @@ void Game::CAP(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
+	free(args);
+
 }
 
 // Prints player's working directory
-void Game::PWD(Player* p, char** args) {
+void Game::PWD(Player* p) {
 
 	string temp = "";
 
@@ -369,7 +421,7 @@ void Game::CD(Player* p, char** args) {
 
 	string temp = "";
 
-	if (strcmp(destdir, (char*)"..") && p->cwd->parent != NULL) {
+	if (strcmp(destdir, "..") == 0 && p->cwd->parent != NULL) {
 
 		p->cwd = p->cwd->parent;
 		temp += "Changed directory to ";
@@ -380,12 +432,14 @@ void Game::CD(Player* p, char** args) {
 
 		bool fileFound = false;
 
-		for (Directory* dir : p->cwd->subdirectories) {
+		Directory* dir;
+		for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+			dir = *i;
 		
 			if (fileFound)
 				break;
 			
-			if (strcmp(dir->name , destdir)) {
+			if (strcmp(dir->name, destdir) == 0) {
 				p->cwd = dir;
 				temp += "Changed directory to ";
 				temp += dir->name;
@@ -409,6 +463,8 @@ void Game::CD(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
+	free(args);
+
 }
 
 // Changes player's working direcotry to a new Virtual Server, if server is occupied, start competitive typing
@@ -417,28 +473,51 @@ void Game::SSH(Player* p, char** args) {
 	char* destserv = strtok(args[1], "\n");
 
 	string temp = "";
+	
+	if (strcmp(destserv, p->cvs->name) == 0) {
+
+		temp += "Could not SSH to ";
+		temp += destserv;
+		temp += ": already connected to ";
+		temp += destserv;
+		temp += '\n';
+
+		char* toPlayer = new char[temp.size()+1];
+		copy(temp.begin(), temp.end(), toPlayer);
+		toPlayer[temp.size()] = '\0';
+
+		p->SendToPlayer(toPlayer);
+
+		free(args);
+		return;
+	}
+
 
 	bool serverFound = false;
 
-	for (VirtualServer* vir : servers) {
+	VirtualServer* serv;
+	for (vector<VirtualServer*>::iterator i = servers->begin(); i != servers->end(); ++i) {
+		serv = *i;
 
 		if (serverFound)
 			break;
 
-		if (strcmp(vir->name, destserv)) {
+		if (strcmp(serv->name, destserv) == 0) {
 
 			serverFound = true;
 
 			int playersInDestServer = 0;
-			for (Player* hacker : activePlayers) {
-				if (strcmp(hacker->cvs, vir->name)) {
+			Player* hacker;
+			for (vector<Player*>::iterator i = activePlayers->begin(); i != activePlayers->end(); ++i) {
+				hacker = *i;
+				if (strcmp(hacker->cvs->name, serv->name) == 0) {
 					playersInDestServer++;
 				}
 			}
 
 			if (playersInDestServer >= 2) {
 				temp += "Could not SSH to ";
-				temp += vir->name;
+				temp += serv->name;
 				temp += ": Server overloaded\n";
 			} else if (playersInDestServer == 1) {
 
@@ -446,10 +525,10 @@ void Game::SSH(Player* p, char** args) {
 
 			} else {
 
-				p->cwd = vir;
-				p->cvs = vir;
+				p->cwd = serv;
+				p->cvs = serv;
 				temp += "SSH to ";
-				temp += vir->name;
+				temp += serv->name;
 				temp += " successful\n";
 
 			}
@@ -471,6 +550,8 @@ void Game::SSH(Player* p, char** args) {
 	toPlayer[temp.size()] = '\0';
 
 	p->SendToPlayer(toPlayer);
+
+	free(args);
 
 }
 

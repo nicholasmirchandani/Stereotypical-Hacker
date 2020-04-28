@@ -11,6 +11,7 @@
 #include <iostream>
 #include <vector>
 #include "VirtualFile.h"
+#include <string.h>
 
 using namespace std;
 
@@ -20,13 +21,18 @@ class Directory {
 		char* name;
 
 		Directory* parent;
-		
-		// Some way of determining if a directory is occupied and when to start typing battles
-
-		Directory(char* name);
 
 		vector<Directory*>* subdirectories;
 		vector<VirtualFile*>* files;
+		
+		Directory(char* name) {
+			char* buff = new char[strlen(name)];
+			strcpy(buff, name);
+			this->name = buff;
+			this->parent = NULL;
+			subdirectories = new vector<Directory*>();
+			files = new vector<VirtualFile*>();
+		}
 
 		void AddSubdir(Directory* subdir) {
 			subdir->parent = this;

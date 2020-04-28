@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <vector>
+#include "Player.h"
 #include "VirtualServer.h"
 #include "Directory.h"
 #include "VirtualFile.h"

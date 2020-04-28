@@ -29,6 +29,22 @@ class VirtualServer : public Directory {
 			this->captured = false;
 		}
 
+		void SetRoot(char* rootuser, char* rootpass) {
+			strcpy(this->rootuser, rootuser);
+			strcpy(this->rootpass, rootpass);
+		}
+
+		void AddOther(char* otheruser, char* otherpass) {
+			otherusers[otherusernum] = new char[50];
+			otherpasses[otherusernum] = new char[50];
+			strcpy(this->otherusers[otherusernum], otheruser);
+			strcpy(this->otherpasses[otherusernum++], otherpass);
+		}
+
+		// char* name(){
+		// 	return Directory::name;
+		// }
+
 };
 
 #endif
