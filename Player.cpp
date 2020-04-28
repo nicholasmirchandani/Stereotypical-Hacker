@@ -13,7 +13,8 @@ Player::Player(SocketConnection* client, bool isHost, char* displayName)
 
 Player::~Player()
 {
-	this->KillPlayer();
+	if (socket->IsAlive())
+		socket->KillConnection();
 }
 
 void Player::changeName(char* newName)
@@ -31,25 +32,27 @@ void Player::SendToPlayer(char* toPlayer) {
 char** Player::ReadFromPlayer() {
 
 	char* fromClient = new char[500];
-	char* args[25];
+	char** args = (char**)malloc(sizeof(char*) * 25);
 	char* tok;
 
 	try {
 		
 		strcpy(fromClient, socket->ReadFromStream());
 		
-		tok = strtok(fromClient, " ");
+		tok = strtok(fromClient, " \n");
 		int i  = 0;
 		while (tok != NULL && i < 25) {
 			if (tok[0] == '\'') {
 				char temptok[450];
-				strcat(temptok, &tok[1]);
+				strcpy(temptok, &tok[1]);
 				strcat(temptok, " ");
-				strcat(temptok, strtok(NULL, "'"));
+				tok = strtok(NULL, "'");
+				if (tok != NULL)
+					strcat(temptok, tok);
 				tok = temptok;
 			} else {
-				arr[i++] = tok;
-				tok = strtok(NULL, " ");
+				args[i++] = tok;
+				tok = strtok(NULL, " \n");
 			}
 		}
 
@@ -66,7 +69,6 @@ char** Player::ReadFromPlayer() {
 
 void Player::KillPlayer() {
 	isAlive = false;
-	socket->KillConnection();
 }
 
 void Player::SwapHost() { // If player is host, player is made not host and vice versa
@@ -79,4 +81,8 @@ bool Player::IsHost() {
 
 bool Player::IsAlive() {
 	return isAlive;
+}
+
+char* Player::DisplayName() {
+	return displayName;
 }

@@ -8,8 +8,10 @@
 
 #include "PersistentServer.h"
 #include "SocketConnection.h"
+#include "Lobby.h"
 #include "reading_failure.h"
 
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 
@@ -17,25 +19,51 @@
 #include Our socket connection library
 #include Random*/
 
-PersistentServer::PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby) {
-	this.LobbyNumberLimit = LobbyNumberLimit;
-	this.MaxPlayersPerLobby = MaxPlayersPerLobby;
+PersistentServer::PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby, int PortNum) {
+	
+	this->LobbyNumberLimit = LobbyNumberLimit;
+	this->MaxPlayersPerLobby = MaxPlayersPerLobby;
+	this->PortNum = PortNum;
+
 	ThreadContinue = true;
 
-	//ActiveLobbies = new List;
-	//LobbyCodesAndLobbies = new Dictionary;
+	activeLobbies = new vector<Lobby*>();
+	lobbyCodesAndLobbies = new map<char*, Lobby*>()
+	
 	// Start ClientConnector;
+	connector = new std::thread(ClientConnector);
 }
 
 PersistentServer::~PersistentServer() {
+	
 	ThreadContinue = false;
+
+	delete activeLobbies;
+	delete lobbyCodesAndLobbies;
+
+	connector->join();
+	serverLoop->join();
 	//Wait until all lobby and listener threads have closed;
-	//delete ActiveLobbies;
-	//delete LobbyCodesAndLobbies;
 }
 
-void PersistentServer::ServerFunctions() {
+void PersistentServer::ServerLoop() {
 
+	string temp;
+
+	while(true) {
+
+		getline(cin, temp);
+
+		if (temp == "shutdown") {
+			ThreadContinue = false;
+			break;
+		} else if (temp == "printlobbies") {
+			for (int i = 0; i < activeLobbies->size(); ++i) {
+				cout << activeLobbies->at(i)->RoomCode() << endl;
+			}
+		}
+
+	}
 	//Accept input from user admin to display number of lobbies, active connections, etc;
 	//Not critical to server functionality, just maintenence and such;
 
@@ -44,7 +72,7 @@ void PersistentServer::ServerFunctions() {
 //Need to wait until socket class is finished
 void PersistentServer::ClientConnector() {
 
-	SocketConnection* listeningSocket = new SocketConnection(PORTNUM);
+	SocketConnection* listeningSocket = new SocketConnection(PortNum);
 
 	char toClient[256]; // char buffer for sending data to clients
 	char fromClient[256]; // char buffer for reading data from clients
@@ -143,3 +171,5 @@ void PersistentServer::AddLobby(SocketConnection* client) {
 	LobbyCodesAndLobbies[roomCode].AddPlayer(client, true);
 
 }
+
+

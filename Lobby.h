@@ -18,7 +18,7 @@ class Lobby {
 	private:
 
 		int MaxPlayers;
-		char* RoomCode;
+		char* roomCode;
 		int playerCount;
 
 		bool gameActive; // Used to handle clients joining mid-game
@@ -41,6 +41,7 @@ class Lobby {
 		void KillLobby();
 
 		bool IsActive();
+		char* RoomCode();
 
 
 };

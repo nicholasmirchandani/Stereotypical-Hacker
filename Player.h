@@ -6,6 +6,9 @@
  *  lobby privilege and display name.
  */
 
+#ifndef PLAYER
+#define PLAYER
+
 #include "SocketConnection.h"
 #include "Directory.h"
 #include "VirtualServer.h"
@@ -40,6 +43,8 @@ class Player {
 
  	bool IsHost();
  	bool IsAlive();
+
+ 	char* DisplayName();
 
 };
 

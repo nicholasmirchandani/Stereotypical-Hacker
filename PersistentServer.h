@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
+#include <map>
+#include <thread>
 
 #include "Lobby.h"
 #include "SocketConnection.h"
@@ -23,21 +25,26 @@
 class PersistentServer {
 
 	private:
+
 		int LobbyNumberLimit;
 		int MaxPlayersPerLobby;
-		std::list<Lobby> activeLobbies;
+		int PortNum;
+
+		std::vector<Lobby*>* activeLobbies;
+		std::map<char*, Lobby*>* lobbyCodesAndLobbies; // Dictionary tracking lobbies by room code and references to the Lobby objects
 
 		bool ThreadContinue; // All threads run until ThreadContinue == false, Maybe a reference to one or something.
 
-		//ThreadID LobbyListener;
+		std::thread* connector;
+		std::thread* serverLoop;
 
-		std::map<char*, Lobby> LobbyCodesAndLobbies; // Dictionary tracking lobbies by room code and references to the Lobby objects
+		//ThreadID LobbyListener;
 
 	public:
 		PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby);
 		~PersistentServer();
 
-		void ServerFunctions(); // A loop for managing threads and other server functions without being blocked on waiting for connections
+		void ServerLoop(); // A loop for managing threads and other server functions without being blocked on waiting for connections
 
 		void ClientConnector(); // A separate thread from the server loop, waits for clients attempting to connect
 
