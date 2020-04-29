@@ -28,10 +28,10 @@ PersistentServer::PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby,
 	ThreadContinue = true;
 
 	activeLobbies = new vector<Lobby*>();
-	lobbyCodesAndLobbies = new map<char*, Lobby*>()
+	lobbyCodesAndLobbies = new map<char*, Lobby*>();
 	
 	// Start ClientConnector;
-	connector = new std::thread(ClientConnector);
+	connector = new std::thread(&PersistentServer::ClientConnector, this);
 }
 
 PersistentServer::~PersistentServer() {
@@ -42,7 +42,6 @@ PersistentServer::~PersistentServer() {
 	delete lobbyCodesAndLobbies;
 
 	connector->join();
-	serverLoop->join();
 	//Wait until all lobby and listener threads have closed;
 }
 
@@ -58,6 +57,8 @@ void PersistentServer::ServerLoop() {
 			ThreadContinue = false;
 			break;
 		} else if (temp == "printlobbies") {
+			if (activeLobbies->size() == 0)
+				std::cout << "No lobbies\n";
 			for (int i = 0; i < activeLobbies->size(); ++i) {
 				cout << activeLobbies->at(i)->RoomCode() << endl;
 			}
@@ -83,11 +84,12 @@ void PersistentServer::ClientConnector() {
 
 		SocketConnection* client = listeningSocket->GetClientConnection();
 		strcpy(toClient, "Connected to Server");
-		client->WriteToStream((void*)msgToClient, strlen(toClient));
+		client->WriteToStream((void*)toClient, strlen(toClient));
 
 		// Maybe delegate reading/splitting data to a function
 		try {
 			strcpy(fromClient, (char*)client->ReadFromStream(256)); // Potential issue if the message received from client doesn't have a terminating null character
+			// std::cout << "DEBUG: MESSAGE RECEIVED" << std::endl;
 		} catch (reading_failure e) {
 			client->KillConnection();
 			continue;
@@ -96,7 +98,7 @@ void PersistentServer::ClientConnector() {
 		tok = strtok(fromClient, " ");
 		if (tok == NULL) { // empty message
 			client->KillConnection();
-			continue
+			continue;
 		} else {
 			int i = 0;
 			while (tok != NULL && i < 25) {
@@ -108,25 +110,25 @@ void PersistentServer::ClientConnector() {
 
 		if (args[0] == "NEWLOBBY") {
 			
-			if (ActiveLobbies.count < LobbyNumberLimit) {
+			if (activeLobbies->size() < LobbyNumberLimit) {
 				AddLobby(client);
 			} else {
 				strcpy(toClient, "ERR SERVERFULL");
-				client->WriteToStream((void*)msgToClient, strlen(toClient));
+				client->WriteToStream((void*)toClient, strlen(toClient));
 				client->KillConnection();
 				continue;
 			}
 
 		} else if (args[0] == "JOINLOBBY") {
 			
-			std::map<RoomCode, Lobby>::iterator iter = LobbyCodesAndLobbies.find(args[1]);
+			std::map<char*, Lobby*>::iterator iter = lobbyCodesAndLobbies->find(args[1]);
 
-			if (iter == LobbyCodesAndLobbies.end()) {
+			if (iter == lobbyCodesAndLobbies->end()) {
 				strcpy(toClient, "ERR BADROOMCODE");
 				client->WriteToStream((void*)toClient, strlen(toClient));
 				client->KillConnection();
 				continue;
-			} else if (LobbyCodesAndLobbies[args[1]].PlayerCount() == MaxPlayersPerLobby){
+			} else if (lobbyCodesAndLobbies->at(args[1])->PlayerCount() == MaxPlayersPerLobby){
 				strcpy(toClient, "ERR LOBBYFULL");
 				client->WriteToStream((void*)toClient, strlen(toClient));
 				client->KillConnection();
@@ -134,7 +136,7 @@ void PersistentServer::ClientConnector() {
 			} else {
 				strcpy(toClient, "OK");
 				client->WriteToStream((void*)toClient, strlen(toClient));
-				LobbyCodesAndLobbies[args[1]].AddPlayer(client, false);
+				lobbyCodesAndLobbies->at(args[1])->AddPlayer(client, false);
 			}
 
 		} else { // Invalid message from client
@@ -162,13 +164,13 @@ void PersistentServer::AddLobby(SocketConnection* client) {
 	roomCode[2] = rand() % 26 + 65;
 	roomCode[3] = rand() % 26 + 65;
 
-	LobbyCodesAndLobbies[roomCode] = new Lobby(roomCode, MaxPlayersPerLobby, client);
+	lobbyCodesAndLobbies->insert(pair<char*, Lobby*>(roomCode, new Lobby(roomCode, MaxPlayersPerLobby, client, &ThreadContinue)));
 
 	char* toClient = new char[256];
 	strcpy(toClient, "OK ");
 	strcat(toClient, roomCode);
 	client->WriteToStream((void*)toClient, strlen(toClient));
-	LobbyCodesAndLobbies[roomCode].AddPlayer(client, true);
+	lobbyCodesAndLobbies->at(roomCode)->AddPlayer(client, true);
 
 }
 

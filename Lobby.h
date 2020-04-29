@@ -27,21 +27,24 @@ class Lobby {
 		std::vector<Player*>* PlayersInLobby; // A list of clients in the lobby
 
 		bool lobbyStillAlive = true;
+		bool* ThreadContinue;
 
 	public:
-		Lobby(char* RoomCode, int MaxPlayers, SocketConnection* host);
+		Lobby(char* RoomCode, int MaxPlayers, SocketConnection* host, bool* ThreadContinue);
 		~Lobby();
 
 		void LobbyLoop(); // Started in new thread in constructor.
-		void RunGame();
+		void RunGame(int virtservs, std::vector<Player*>* PlayersInLobby);
 
 		void AddPlayer(SocketConnection* client, bool isHost);
-		void ClientListener(SocketConnection* client, bool isHost);
+		void ClientListener(Player* player, bool isHost);
 
 		void KillLobby();
 
 		bool IsActive();
 		char* RoomCode();
+
+		int PlayerCount();
 
 
 };

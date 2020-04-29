@@ -37,7 +37,7 @@ char** Player::ReadFromPlayer() {
 
 	try {
 		
-		strcpy(fromClient, socket->ReadFromStream());
+		strcpy(fromClient, (char*)socket->ReadFromStream(500));
 		
 		tok = strtok(fromClient, " \n");
 		int i  = 0;

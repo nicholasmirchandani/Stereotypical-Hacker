@@ -36,12 +36,11 @@ class PersistentServer {
 		bool ThreadContinue; // All threads run until ThreadContinue == false, Maybe a reference to one or something.
 
 		std::thread* connector;
-		std::thread* serverLoop;
 
 		//ThreadID LobbyListener;
 
 	public:
-		PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby);
+		PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby, int PortNum);
 		~PersistentServer();
 
 		void ServerLoop(); // A loop for managing threads and other server functions without being blocked on waiting for connections

@@ -12,8 +12,10 @@
 #include "Game.h"
 #include <cstdlib>
 #include <vector>
+#include <thread>
+#include <algorithm>
 
-Lobby::Lobby(char* roomCode, int MaxPlayers, SocketConnection* HostClient) {
+Lobby::Lobby(char* roomCode, int MaxPlayers, SocketConnection* HostClient, bool* ThreadContinue) {
 
 	this->roomCode = roomCode;
 	this->MaxPlayers = MaxPlayers;
@@ -22,7 +24,9 @@ Lobby::Lobby(char* roomCode, int MaxPlayers, SocketConnection* HostClient) {
 	PlayersInLobby = new std::vector<Player*>();
 	AddPlayer(HostClient, true); // Keep host player at front to check for security of Lobby commands
 
-	std::thread LobbyThread(LobbyLoop);
+	this->ThreadContinue = ThreadContinue;
+
+	std::thread LobbyThread(&Lobby::LobbyLoop, this);
 
 }
 
@@ -35,7 +39,7 @@ Lobby::~Lobby() {
 	for (int i = playerCount-1; i > -1 ; --i) {
 
 		PlayersInLobby->at(i)->KillPlayer();
-		PlayersInLobby->erase(i);
+		PlayersInLobby->pop_back();
 
 	}
 
@@ -45,9 +49,9 @@ Lobby::~Lobby() {
 
 void Lobby::LobbyLoop() {
 
-	while(ThreadContinue && PlayerCount > 0) {
+	while(*ThreadContinue && playerCount > 0) {
 
-		if (gameActive && game->serversRemaining == 0) {
+		if (gameActive && game->ServersRemaining() == 0) {
 			
 			std::string temp = "";
 
@@ -70,7 +74,7 @@ void Lobby::LobbyLoop() {
 				temp += winners->front()->score;
 				temp += ", the winners are ";
 				for (int i = 0; i < winners->size(); ++i) {
-					temp += winners->at(i)->DispayName();
+					temp += winners->at(i)->DisplayName();
 					temp += ", ";
 					if (i == winners->size()-2) {
 						temp += "and ";
@@ -82,7 +86,7 @@ void Lobby::LobbyLoop() {
 				temp += "With a score of ";
 				temp += winners->front()->score;
 				temp += ", the winner is ";
-				temp += winners->front->DisplayName();
+				temp += winners->front()->DisplayName();
 				temp += '\n';
 			}
 
@@ -104,7 +108,7 @@ void Lobby::LobbyLoop() {
 
 }
 
-void Lobby::RunGame() {
+void Lobby::RunGame(int virtservs, std::vector<Player*>* PlayersInLobby) {
 
 	// Kick off the game logic here.
 	Player* p;
@@ -120,9 +124,9 @@ void Lobby::RunGame() {
 
 void Lobby::AddPlayer(SocketConnection* client, bool isHost) {
 
-	Player* p = new Player(client, isHost, "SomeGeneratedDisplayName");
+	Player* p = new Player(client, isHost, (char*)"SomeGeneratedDisplayName");
 	PlayersInLobby->push_back(p);
-	std::thread clientThread(ClientListener, p, isHost);
+	std::thread clientThread(&Lobby::ClientListener, this, p, isHost);
 	playerCount++;
 
 }
@@ -131,7 +135,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	char** args;
 
-	while (player->IsAlive()) {
+	while (*ThreadContinue && player->IsAlive()) {
 		args = player->ReadFromPlayer();
 
 		if (gameActive) { // game commands
@@ -233,12 +237,12 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	// After connection broken, remove Player from List of Players, playerCount--, kill Client connection.
 	// If host quits, assign new player to be the host.
-	PlayersInLobby->remove(player);
+	std::remove(PlayersInLobby->begin(), PlayersInLobby->end(), player);
 	playerCount--;
 	if (playerCount == 0) {
-		this->KillLobby;
+		this->KillLobby();
 	} else if (player->IsHost()) {
-		PlayersInLobby->first()->SwapHost();
+		PlayersInLobby->front()->SwapHost();
 	}
 
 	player->KillPlayer();
@@ -263,4 +267,8 @@ bool Lobby::IsActive() {
 
 char* Lobby::RoomCode() {
 	return roomCode;
+}
+
+int Lobby::PlayerCount() {
+	return playerCount;
 }
