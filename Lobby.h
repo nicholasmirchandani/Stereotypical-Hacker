@@ -12,6 +12,7 @@
 #include "SocketConnection.h"
 #include "Player.h"
 #include "Game.h"
+#include <thread>
 
 class Lobby {
 
@@ -23,6 +24,8 @@ class Lobby {
 
 		bool gameActive; // Used to handle clients joining mid-game
 		Game* game;
+
+		std::thread* LobbyThread;
 
 		std::vector<Player*>* PlayersInLobby; // A list of clients in the lobby
 
@@ -42,6 +45,7 @@ class Lobby {
 		void KillLobby();
 
 		bool IsActive();
+		bool InGame();
 		char* RoomCode();
 
 		int PlayerCount();

@@ -14,6 +14,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <chrono>
 
 /*#include A threading library
 #include Our socket connection library
@@ -32,6 +33,7 @@ PersistentServer::PersistentServer(int LobbyNumberLimit, int MaxPlayersPerLobby,
 	
 	// Start ClientConnector;
 	connector = new std::thread(&PersistentServer::ClientConnector, this);
+	deadLobbyDetector = new std::thread(&PersistentServer::DeadLobbyDetector, this);
 }
 
 PersistentServer::~PersistentServer() {
@@ -42,6 +44,7 @@ PersistentServer::~PersistentServer() {
 	delete lobbyCodesAndLobbies;
 
 	connector->join();
+	deadLobbyDetector->join();
 	//Wait until all lobby and listener threads have closed;
 }
 
@@ -60,13 +63,37 @@ void PersistentServer::ServerLoop() {
 			if (activeLobbies->size() == 0)
 				std::cout << "No lobbies\n";
 			for (int i = 0; i < activeLobbies->size(); ++i) {
-				cout << activeLobbies->at(i)->RoomCode() << endl;
+				std::cout << activeLobbies->at(i)->RoomCode();
+				if (activeLobbies->at(i)->InGame()) {
+					std::cout << " - In game";
+				} else {
+					std::cout << " - In lobby";
+				}
+				std::cout << std::endl;
+
 			}
 		}
 
 	}
 	//Accept input from user admin to display number of lobbies, active connections, etc;
 	//Not critical to server functionality, just maintenence and such;
+
+}
+
+void PersistentServer::DeadLobbyDetector() {
+
+	while (ThreadContinue) {
+		std::this_thread::sleep_for(std::chrono::seconds(2));
+		for (int i = activeLobbies->size()-1; i > -1; --i) {
+			Lobby* l = activeLobbies->at(i);
+			if (!l->IsActive()) {
+				char* roomCode = l->RoomCode();
+				activeLobbies->erase(activeLobbies->begin() + i);
+				lobbyCodesAndLobbies->erase(roomCode);
+				delete l;
+			}
+		}
+	}
 
 }
 
@@ -89,7 +116,6 @@ void PersistentServer::ClientConnector() {
 		// Maybe delegate reading/splitting data to a function
 		try {
 			strcpy(fromClient, (char*)client->ReadFromStream(256)); // Potential issue if the message received from client doesn't have a terminating null character
-			// std::cout << "DEBUG: MESSAGE RECEIVED" << std::endl;
 		} catch (reading_failure e) {
 			client->KillConnection();
 			continue;
@@ -103,15 +129,16 @@ void PersistentServer::ClientConnector() {
 			int i = 0;
 			while (tok != NULL && i < 25) {
 				args[i] = tok;
-				tok = strtok(fromClient, " ");
+				tok = strtok(NULL, " ");
 				++i;
 			}
 		}
 
-		if (args[0] == "NEWLOBBY") {
+		if (strcmp(args[0], "NEWLOBBY") == 0) {
 			
 			if (activeLobbies->size() < LobbyNumberLimit) {
 				AddLobby(client);
+
 			} else {
 				strcpy(toClient, "ERR SERVERFULL");
 				client->WriteToStream((void*)toClient, strlen(toClient));
@@ -119,16 +146,24 @@ void PersistentServer::ClientConnector() {
 				continue;
 			}
 
-		} else if (args[0] == "JOINLOBBY") {
+		} else if (strcmp(args[0], "JOINLOBBY") == 0) {
 			
-			std::map<char*, Lobby*>::iterator iter = lobbyCodesAndLobbies->find(args[1]);
+			char* tok = strtok(args[1], "\n");
 
-			if (iter == lobbyCodesAndLobbies->end()) {
+			bool lobbyfound = false;
+			Lobby* lobbytojoin;
+			for (std::map<char*, Lobby*>::iterator i = lobbyCodesAndLobbies->begin(); i != lobbyCodesAndLobbies->end(); ++i) {
+				if (strcmp((*i).first, tok) == 0) {
+					lobbyfound = true;
+					lobbytojoin = (*i).second;
+				}			
+			}
+			if (!lobbyfound) {
 				strcpy(toClient, "ERR BADROOMCODE");
 				client->WriteToStream((void*)toClient, strlen(toClient));
 				client->KillConnection();
 				continue;
-			} else if (lobbyCodesAndLobbies->at(args[1])->PlayerCount() == MaxPlayersPerLobby){
+			} else if (lobbytojoin->PlayerCount() == MaxPlayersPerLobby){
 				strcpy(toClient, "ERR LOBBYFULL");
 				client->WriteToStream((void*)toClient, strlen(toClient));
 				client->KillConnection();
@@ -136,7 +171,7 @@ void PersistentServer::ClientConnector() {
 			} else {
 				strcpy(toClient, "OK");
 				client->WriteToStream((void*)toClient, strlen(toClient));
-				lobbyCodesAndLobbies->at(args[1])->AddPlayer(client, false);
+				lobbytojoin->AddPlayer(client, false);
 			}
 
 		} else { // Invalid message from client
@@ -158,19 +193,28 @@ void PersistentServer::AddLobby(SocketConnection* client) {
 
 	srand(time(NULL));
 
-	char* roomCode = new char[4];
+	char* roomCode = new char[5];
 	roomCode[0] = rand() % 26 + 65;
 	roomCode[1] = rand() % 26 + 65;
 	roomCode[2] = rand() % 26 + 65;
 	roomCode[3] = rand() % 26 + 65;
+	roomCode[4] = '\0';
+	while (lobbyCodesAndLobbies->count(roomCode) > 0) {
+		roomCode[0] = rand() % 26 + 65;
+		roomCode[1] = rand() % 26 + 65;
+		roomCode[2] = rand() % 26 + 65;
+		roomCode[3] = rand() % 26 + 65;
+	}
 
-	lobbyCodesAndLobbies->insert(pair<char*, Lobby*>(roomCode, new Lobby(roomCode, MaxPlayersPerLobby, client, &ThreadContinue)));
+	Lobby* newlobby = new Lobby(roomCode, MaxPlayersPerLobby, client, &ThreadContinue);
+
+	(*lobbyCodesAndLobbies)[roomCode] = newlobby;
 
 	char* toClient = new char[256];
 	strcpy(toClient, "OK ");
 	strcat(toClient, roomCode);
 	client->WriteToStream((void*)toClient, strlen(toClient));
-	lobbyCodesAndLobbies->at(roomCode)->AddPlayer(client, true);
+	activeLobbies->push_back(newlobby);
 
 }
 

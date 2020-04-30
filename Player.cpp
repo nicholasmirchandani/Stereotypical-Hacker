@@ -2,6 +2,8 @@
 #include "SocketConnection.h"
 #include "reading_failure.h"
 
+#include <iostream>
+
 Player::Player(SocketConnection* client, bool isHost, char* displayName)
 {
   this->isHost = isHost;
@@ -32,7 +34,9 @@ void Player::SendToPlayer(char* toPlayer) {
 char** Player::ReadFromPlayer() {
 
 	char* fromClient = new char[500];
-	char** args = (char**)malloc(sizeof(char*) * 25);
+
+	// char** args = (char**)malloc(sizeof(char*) * 25);
+	char** args = new char*[25];
 	char* tok;
 
 	try {
@@ -73,6 +77,7 @@ void Player::KillPlayer() {
 
 void Player::SwapHost() { // If player is host, player is made not host and vice versa
 	isHost = !isHost;
+	SendToPlayer((char*)"Host quit, you are now lobby host\n");
 }
 
 bool Player::IsHost() {

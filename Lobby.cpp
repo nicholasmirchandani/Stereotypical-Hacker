@@ -26,7 +26,7 @@ Lobby::Lobby(char* roomCode, int MaxPlayers, SocketConnection* HostClient, bool*
 
 	this->ThreadContinue = ThreadContinue;
 
-	std::thread LobbyThread(&Lobby::LobbyLoop, this);
+	LobbyThread = new std::thread(&Lobby::LobbyLoop, this);
 
 }
 
@@ -44,6 +44,9 @@ Lobby::~Lobby() {
 	}
 
 	delete PlayersInLobby;
+
+	LobbyThread->join();
+	delete LobbyThread;
 
 }
 
@@ -116,8 +119,8 @@ void Lobby::RunGame(int virtservs, std::vector<Player*>* PlayersInLobby) {
 		p = *i;
 		p->SendToPlayer((char*)"GAME STARTING");
 	}
-	gameActive = true;
 	game = new Game(MaxPlayers + 3, PlayersInLobby);
+	gameActive = true;
 	// Maybe put a little bit of a break here
 
 }
@@ -127,16 +130,20 @@ void Lobby::AddPlayer(SocketConnection* client, bool isHost) {
 	Player* p = new Player(client, isHost, (char*)"SomeGeneratedDisplayName");
 	PlayersInLobby->push_back(p);
 	std::thread clientThread(&Lobby::ClientListener, this, p, isHost);
+	clientThread.detach(); // Potentially dangerous; revisit when you feel like making a safe program
 	playerCount++;
 
 }
 
 void Lobby::ClientListener(Player* player, bool isHost) {
 
-	char** args;
-
 	while (*ThreadContinue && player->IsAlive()) {
+
+		char** args;
 		args = player->ReadFromPlayer();
+		if  (args == NULL) {
+			break;
+		}
 
 		if (gameActive) { // game commands
 
@@ -150,17 +157,17 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 				game->CAP(player, args);
 			} else if (strcmp(args[0], "pwd") == 0) {
 				game->PWD(player);
-				free(args);
+				delete args; // free(args);
 			} else if (strcmp(args[0], "cd") == 0) {
 				game->CD(player, args);
 			} else if (strcmp(args[0], "ssh") == 0) {
 				game->SSH(player, args);
 			} else if (strcmp(args[0], "help") == 0) {
 				game->HELP(player);
-				free(args);
+				delete args; // free(args);
 			} else if (strcmp(args[0], "quit") == 0) {
 				player->KillPlayer();
-				free(args);
+				delete args; // free(args);
 			}
 			
 		}
@@ -169,18 +176,19 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 			
 			if (strcmp(args[0], "rename") == 0) {
 				player->changeName(args[1]);
-				free(args);
+				delete args; // free(args);
 			} else if (strcmp(args[0], "chat") == 0) {
+
+				std::string temp = "";
+				temp += player->DisplayName();
+				temp += " - ";
+				temp += args[1];
+
 				Player* p;
 				for (vector<Player*>::iterator i = PlayersInLobby->begin(); i != PlayersInLobby->end(); ++i) {
 					
 					p = *i;
-
-					std::string temp = "";
-					temp += p->DisplayName();
-					temp += " - ";
-					temp += args[1]; // Needs some way to keep words within quotes as one char* (from ReadFromPlayer)
-					
+				
 					char* toPlayer = new char[temp.size()+1];
 					copy(temp.begin(), temp.end(), toPlayer);
 					toPlayer[temp.size()] = '\0';
@@ -188,21 +196,41 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 					p->SendToPlayer(toPlayer);
 
 				}
-				free(args);
+				delete args; // free(args);
 			} else if (strcmp(args[0], "quit") == 0) {
 				player->KillPlayer();
+				delete args; // free(args);
+			} else if (strcmp(args[0], "listplayers") == 0) {
+				std::string temp = "\n";
+				for (int i = 0; i < PlayersInLobby->size(); ++i) {
+					temp += PlayersInLobby->at(i)->DisplayName();
+					temp += '\n';
+				}
+				temp += '\n';
+				
+				char* toPlayer = new char[temp.size()+1];
+				copy(temp.begin(), temp.end(), toPlayer);
+				toPlayer[temp.size()] = '\0';
+
+				player->SendToPlayer(toPlayer);
+
 				free(args);
 			} else if (strcmp(args[0], "help") == 0) {
-				std::string temp = " --- LOBBY COMMANDS ---\n\n";
+				std::string temp = "\n --- LOBBY COMMANDS ---\n\n";
 				temp += "rename - Change your display name\n";
 				temp += "   Usage: rename <new-display-name>\n\n";
 				temp += "chat - Send a message to all other players in the lobby\n";
 				temp += "   Usage: chat '<message>'\n\n";
+				temp += "listplayers - Lists name of all players in lobby\n";
+				temp += "   Usage: listplayers\n\n";
 				temp += "quit - Exit the lobby and quit the game\n";
-				temp += "   Usage: quit\n";
+				temp += "   Usage: quit\n\n";
 				if (player->IsHost()) {
 					temp += "rungame - Starts game\n";
 					temp += "   Usage: rungame\n\n";
+					temp += "boot - Boots player from lobby\n";
+					temp += "   Usage: boot <player-name>\n\n";
+
 				}
 
 				char* toPlayer = new char[temp.size()+1];
@@ -211,22 +239,22 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 				player->SendToPlayer(toPlayer);
 
-				free(args);
+				delete args; // free(args);
 			} // more lobby commands
 
 			else if (player->IsHost()) { // host commands
 
 				if (strcmp(args[0], "rungame") == 0) {
 					RunGame(playerCount + 4, PlayersInLobby);
-					free(args);
+					delete args; // free(args);
 				} else if (strcmp(args[0], "boot") == 0) {
 					for (int i = 0; i < playerCount; ++i) {
 						char* tok = strtok(args[1], "\n");
-						if (strcmp(PlayersInLobby->at(i)->DisplayName(), tok)) {
+						if (strcmp(PlayersInLobby->at(i)->DisplayName(), tok) == 0) {
 							PlayersInLobby->at(i)->KillPlayer();
 						}
 					}
-					free(args);
+					delete args; // free(args);
 				}
 
 			}
@@ -237,7 +265,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	// After connection broken, remove Player from List of Players, playerCount--, kill Client connection.
 	// If host quits, assign new player to be the host.
-	std::remove(PlayersInLobby->begin(), PlayersInLobby->end(), player);
+	std::remove(PlayersInLobby->begin(), PlayersInLobby->end(), player); // this line is busted
 	playerCount--;
 	if (playerCount == 0) {
 		this->KillLobby();
@@ -263,6 +291,10 @@ bool Lobby::IsActive() {
 
 	return lobbyStillAlive;
 
+}
+
+bool Lobby::InGame() {
+	return gameActive;
 }
 
 char* Lobby::RoomCode() {
