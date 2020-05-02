@@ -37,6 +37,6 @@ int main(int argc, char** argv) {
 
 void ServerListener() {
 	while (true) {
-		cout << '\n' << (char*)toserver->ReadFromStream(500) << endl << "hack@deeznuts:> " << flush;
+		cout << '\n' << (char*)toserver->ReadFromStream(500) << endl << "test@shell:> " << flush;
 	}
 }
