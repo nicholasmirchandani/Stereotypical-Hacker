@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 	thread listen(ServerListener);
 
 	while (true) {
-		cout << "hack@deeznuts:> ";
+		cout << "test@shell:> ";
 		getline(cin, temp);
 
 		char* toServer = new char[temp.size()+1];

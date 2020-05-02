@@ -139,7 +139,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	while (*ThreadContinue && player->IsAlive()) {
 
-		char** args;
+		char** args = new char*[25];
 		args = player->ReadFromPlayer();
 		if  (args == NULL) {
 			break;
