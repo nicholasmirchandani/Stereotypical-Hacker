@@ -214,7 +214,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 				player->SendToPlayer(toPlayer);
 
-				free(args);
+				delete args;
 			} else if (strcmp(args[0], "help") == 0) {
 				std::string temp = "\n --- LOBBY COMMANDS ---\n\n";
 				temp += "rename - Change your display name\n";
