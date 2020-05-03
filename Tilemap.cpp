@@ -78,7 +78,7 @@ void Tilemap::updateTerminal() {
 			cout << "\033[48;5;" << map[i][j]->getBg() << "m";
 			cout << map[i][j]->getChr();
 		}
-		if(i != y-1) {
+		if(i < y - 1) {
 			cout << "\n";
 		}
 		cout << flush;
@@ -88,6 +88,8 @@ void Tilemap::updateTerminal() {
 
 	cout << "\033[38;5;255m";	// Reset foreground color (white)
 	cout << "\033[48;5;0m";	// Reset background color (black)
+	
+	cout << "\033[H";	// cursorhome again to avoid user input forcing a new line
 }
 
 void Tilemap::fillMap(char newChar) {

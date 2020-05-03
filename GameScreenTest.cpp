@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
 			gScrn->getTilemap()->writeString(19, 3, to_string(gScrn->getMisses()));
 
 			gScrn->updateTerminal();
+			
 		}
 	}
 	
