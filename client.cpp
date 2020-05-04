@@ -45,13 +45,37 @@ int main() {
         std::cout << username << "$ " << std::flush;
         std::getline(std::cin, command);
         std::cout << "Command entered: " << command;
-        if(command == "playgame") {
+
+        //Send all commands to server, regardless of what they are
+        char* toServer = new char[temp.size()+1];
+        copy(temp.begin(), temp.end(), toServer);
+        toServer[temp.size()] = '\0';
+        write(sockfd, toServer, strlen(toServer));
+        delete(toServer);
+
+        //Command specific client behavior going to be defined by the server in the end
+        char buffer[100];
+        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+        int len = read(sockfd, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        std::string serverResponse(buffer); 
+
+        //Going to assume PRINT: as a prefix for everything the client's supposed to print
+        if(serverResponse.substr(0,6) == "PRINT:") {
+            std::cout << serverResponse.substr(6);
+        }
+
+        /*  Commented out to focus on framework
+            //Start Game Code
+            playGame(sockfd);
+        */
+
+        if(command == "quit") {
+            //When they type quit, end the program after the server's done its duties
             break;
         }
     }
 
-    //Start Game Code
-    playGame(sockfd);
+
     
     // Step 5: Close the connection
     close(sockfd);

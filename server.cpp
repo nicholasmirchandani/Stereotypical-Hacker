@@ -10,12 +10,13 @@
 #include <arpa/inet.h>
 
 void playGame(int p1Socket, int p2Socket);
-void listenPlayer(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
+void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
+void listenPlayer(int playerSocket);
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
     //Socket code taken from springer and then modified
-    int listeningSocket, p1Socket, p2Socket;
+    int listeningSocket;
     struct sockaddr_in serverAddress, p1Address, p2Address;
 
     // Step 1: Create a socket
@@ -32,18 +33,55 @@ int main() {
 
     // Step 4: Accept 2 connection requests
     unsigned int client_len = sizeof(struct sockaddr_in);
-    p1Socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
-    p2Socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
+    Player p1;
+    Player p2;    
+    p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
+    p2.socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
 
-    //NOTE: Reading from the connections within the game itself.
-    playGame(p1Socket, p2Socket);
+    //Close the listening socket after we've connected our 2 players
+    close(listeningSocket);
+
+    std::thread listenP1(listenPlayer, p1.socket);
+    std::thread listenP2(listenPlayer, p2.socket);
+
+    listenP1.join();
+    listenP2.join();
+
+    //Don't just start the game, unless both sockets say to play the game.  Commenting out game now to handle connection stuff later
+    //playGame(p1Socket, p2Socket);
 
     // Step 6: Close the connections
     close(p2Socket);
     close(p1Socket);
-    close(listeningSocket);
     return 0;
 }
+
+void listenPlayer(int playerSocket) {
+    while(true) {
+        char buffer[100];
+        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
+        fflush(stdout);
+        std::string command(buffer);
+        std::string temp;
+        if(command == "quit") {
+            //Send all commands back to client if it isn't quit
+            temp = "QUITGAME:";
+            break;
+        } else {
+            //Send all commands back to client if it isn't quit
+            temp = "PRINT:" + "Server received " + command;
+        }
+        //Always send a message back to the player, to prevent it from waiting forever
+        char* toClient = new char[temp.size()+1];
+        copy(temp.begin(), temp.end(), toClient);
+        toClient[temp.size()] = '\0';
+        write(playerSocket, toClient, strlen(toClient));
+    }
+}
+
+//GAME CODE BELOW
 
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 void playGame(int p1Socket, int p2Socket) {
@@ -55,10 +93,9 @@ void playGame(int p1Socket, int p2Socket) {
     write(p2Socket, messageToSend, strlen(messageToSend));
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
     bool gameOver = false;
-    std::thread listenP1(listenPlayer, p1Socket, p2Socket, &p1Index, targetSentence, &gameOver);
-    std::thread listenP2(listenPlayer, p2Socket, p1Socket, &p2Index, targetSentence, &gameOver);
+    std::thread listenP1(listenPlayerGame, p1Socket, p2Socket, &p1Index, targetSentence, &gameOver);
+    std::thread listenP2(listenPlayerGame, p2Socket, p1Socket, &p2Index, targetSentence, &gameOver);
     //Killing the threads instead of joining them, since when one of them finishes the spinlock will free up.
-    //NOTE: Joining because thread termination isn't a thing
     listenP1.join();
     listenP2.join();
     if (p1Index > p2Index) {
@@ -72,7 +109,7 @@ void playGame(int p1Socket, int p2Socket) {
 
 
 //NOTE: This is insecure, poorly coded, and easily exploitable, as you can just flood the server with whatever you want atm.  Goal is to actually check packet contents eventually.
-void listenPlayer(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver) {
+void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver) {
     char buffer[100];
     //Check if either player has 'won' every step of the way by checking if the value of the index is > the length of targetSentence
     while(!(*gameOver)) {
@@ -80,7 +117,7 @@ void listenPlayer(int playerSocket, int otherSocket, int* index, std::string tar
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-        printf("Received %d bytes: %s\n", len, buffer); //Prints out receivedMessage
+        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
         fflush(stdout);
         if(len == 3) {
             break; //If len is 3, it's just 'ACK' to a 'FIN'
