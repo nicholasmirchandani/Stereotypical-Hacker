@@ -7,10 +7,10 @@
 #include "GameScreen.h"
 
 GameScreen::GameScreen() {
-	init("Testing, testing, one two three.", 3, 12, 36, 10);
+	init(" ", 3, 12, 72, 10);
 	
 	// Placeholder box for opponent's progress:
-	tMap->drawBox(42, 12, 36, 10, true, ' ', 0, 1);
+	//tMap->drawBox(42, 12, 36, 10, true, ' ', 0, 1);
 }
 
 GameScreen::GameScreen(string newPhrase) {
@@ -52,6 +52,9 @@ int GameScreen::getMisses() {
 }
 
 bool GameScreen::charTyped(char typed) {
+	if((int)typed == 127) {	// Ignore backspaces.
+		return true;
+	}
 	if(typed == phrase[index]) {
 		updateCursor(false);
 		index++;
@@ -99,4 +102,54 @@ void GameScreen::updateCursor(bool active) {
 }
 
 
+bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
 	
+	// Prepare info labels.
+	this->getTilemap()->writeString(0, 1, "Last key pressed:");
+	this->getTilemap()->writeString(0, 2, "Phrase number:");
+	this->getTilemap()->writeString(0, 3, "Misses:");
+	this->getTilemap()->writeString(0, 4, "Press ']' to forfeit the battle.");
+	if(debug) {
+		this->getTilemap()->writeString(0, 4, "Press '[' to skip a phrase (Debug only)");
+	}
+
+	// Loop for each phrase.
+	char userInput = 127;	// Treat first input as a backspace.
+	for(int i = 0; i < phraseAmt; ++i) {
+		
+		this->changePhrase(phrases[i]);
+		this->updateTerminal();
+		
+		// While the phrase is not yet complete...
+		while(!this->phraseComplete()) {
+			
+			//cout << (int)userInput;
+
+			// ...get keypress from user...
+			system("stty raw");
+			userInput = getchar();
+			system("stty cooked");
+			
+			// ...handle special keys...
+			if(userInput == '[' && debug) {	// Skip a phrase in debug mode.
+				break;
+			}
+			if(userInput == ']') {	// Forfeit this entire battle.
+				return false;
+			}
+			
+			
+			this->charTyped(userInput);
+
+			// ...and then update the screen.
+			this->getTilemap()->setChar(19, 1, userInput);	// "Last key pressed:"
+			this->getTilemap()->writeString(19, 2, to_string(i + 1) + " of " + to_string(phraseAmt));	// "Phrase number:"
+			this->getTilemap()->writeString(19, 3, to_string(this->getMisses()));	// "Misses:"
+			
+			this->updateTerminal();
+			
+		}
+	}
+	
+	return true;
+}

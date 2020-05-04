@@ -23,6 +23,8 @@ class GameScreen {
 		bool charTyped(char typed);
 		void updateTerminal();
 		bool phraseComplete();
+		
+		bool run(int phraseAmt, string* phrases, bool debug);	// Returns true upon successful completion, false upon forfeit.
 
 	private:
 		string phrase;
