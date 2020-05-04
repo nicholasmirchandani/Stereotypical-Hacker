@@ -63,6 +63,7 @@ int main() {
         int len = read(sockfd, buffer, 1000); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         std::string serverResponse(buffer); 
 
+        std::cout << "DEBUG LOG: SERVER RESPONSE: " << serverResponse << std::endl;
         //Going to assume PRINT: as a prefix for everything the client's supposed to print
         if(serverResponse.substr(0,7) == "PRINT: ") {
             std::cout << serverResponse.substr(7) << std::endl;
