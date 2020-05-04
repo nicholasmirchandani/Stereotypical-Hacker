@@ -12,10 +12,8 @@
 //https://www.tutorialspoint.com/Read-a-character-from-standard-input-without-waiting-for-a-newline-in-Cplusplus
 
 void waitForFIN(int serverSocket, bool* gameOver);
-
+void playGame(int sockfd);
 int main() {
-    /*Boilerplate Network Code*/
-
     //Network code taken from Springer and then modified
     // Step 1: Create a socket
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -34,7 +32,33 @@ int main() {
         exit(1);
     }
 
-    /*End Boilerplate network code*/
+    /*End network code*/
+
+    std::cout << "Enter a username: " << std::flush;
+    std::string username;
+    std::getline(std::cin, username);
+    std::cout << "Username: '" << username << "' confirmed." << std::endl;
+
+    //CONSOLE CODE:
+    std::string command;
+    while(true) {
+        std::cout << username << "$ " << std::flush;
+        std::getline(std::cin, command);
+        std::cout << "Command entered: " << command;
+        if(command == "playgame") {
+            break;
+        }
+    }
+
+    //Start Game Code
+    playGame(sockfd);
+    
+    // Step 5: Close the connection
+    close(sockfd);
+    return 0;
+}
+
+void playGame(int sockfd) {
     bool gameOver = false;
     //Read data from the connection to set targetSentence
     char buffer[100];
@@ -69,9 +93,6 @@ int main() {
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
     listenForFIN.join();
-    // Step 5: Close the connection
-    close(sockfd);
-    return 0;
 }
 
 void waitForFIN(int serverSocket, bool* gameOver) {
