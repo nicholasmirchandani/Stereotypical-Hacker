@@ -152,7 +152,7 @@ void SocketConnection::WriteToStream(void* Data, int len) { // Note to self: may
  * @param: int len - the number of bytes of data to read
  * @return: void* - Pointer to the data read from the socket
  */
-void* SocketConnection::ReadFromStream(int len) {
+char* SocketConnection::ReadFromStream(int len) {
 
 	if (mode == 'l') {
 		return NULL;
@@ -169,7 +169,7 @@ void* SocketConnection::ReadFromStream(int len) {
 		throw reading_failure("Client connection closed");
 	}
 
-	return (void*)dest;
+	return dest;
 
 }
 

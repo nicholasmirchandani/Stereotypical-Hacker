@@ -22,24 +22,22 @@ class Directory {
 
 		Directory* parent;
 
-		vector<Directory*>* subdirectories;
-		vector<VirtualFile*>* files;
+		vector<Directory*> subdirectories;
+		vector<VirtualFile*> files;
 		
 		Directory(char* name) {
 			char* buff = new char[strlen(name)];
 			strcpy(buff, name);
 			this->name = buff;
 			this->parent = NULL;
-			subdirectories = new vector<Directory*>();
-			files = new vector<VirtualFile*>();
 		}
 
 		void AddSubdir(Directory* subdir) {
 			subdir->parent = this;
-			subdirectories->push_back(subdir);
+			subdirectories.push_back(subdir);
 		}
 		void AddFile(VirtualFile* file) {
-			files->push_back(file);
+			files.push_back(file);
 		}
 
 };

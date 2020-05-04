@@ -33,7 +33,7 @@ void Player::SendToPlayer(char* toPlayer) {
 // Converts input from a socket stream into a char*, denoting strings within single quotes as one argument
 char** Player::ReadFromPlayer() {
 
-	char* fromClient = new char[500];
+	char* fromClient;
 
 	// char** args = (char**)malloc(sizeof(char*) * 25);
 	char** args = new char*[25];
@@ -41,7 +41,9 @@ char** Player::ReadFromPlayer() {
 
 	try {
 		
-		strcpy(fromClient, (char*)socket->ReadFromStream(500));
+		fromClient = socket->ReadFromStream(500);
+		std::cout << "From client raw: " << fromClient << std::endl << std::flush;
+		std::cout << "Garbage character: " << (int)fromClient[strlen(fromClient)-1] << std::endl << std::flush;
 		
 		tok = strtok(fromClient, " \n");
 		int i  = 0;

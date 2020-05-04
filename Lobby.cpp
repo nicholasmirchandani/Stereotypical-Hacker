@@ -21,7 +21,6 @@ Lobby::Lobby(char* roomCode, int MaxPlayers, SocketConnection* HostClient, bool*
 	this->MaxPlayers = MaxPlayers;
 	playerCount = 0;
 
-	PlayersInLobby = new std::vector<Player*>();
 	AddPlayer(HostClient, true); // Keep host player at front to check for security of Lobby commands
 
 	this->ThreadContinue = ThreadContinue;
@@ -38,12 +37,10 @@ Lobby::~Lobby() {
 	// Delete clients in lobby
 	for (int i = playerCount-1; i > -1 ; --i) {
 
-		PlayersInLobby->at(i)->KillPlayer();
-		PlayersInLobby->pop_back();
+		PlayersInLobby.at(i)->KillPlayer();
+		PlayersInLobby.pop_back();
 
 	}
-
-	delete PlayersInLobby;
 
 	LobbyThread->join();
 	delete LobbyThread;
@@ -59,27 +56,27 @@ void Lobby::LobbyLoop() {
 			std::string temp = "";
 
 			gameActive = false;
-			vector<Player*>* winners;
-			winners->push_back(PlayersInLobby->at(0));
+			vector<Player*> winners;
+			winners.push_back(PlayersInLobby.at(0));
 
 			for (int i = 1; i < playerCount; ++i) {
-				if (PlayersInLobby->at(i)->score > winners->at(0)->score) {
-					winners->erase(winners->begin(), winners->end());
-					winners->push_back(PlayersInLobby->at(i));
-				} else if (PlayersInLobby->at(i)->score == winners->at(0)->score) {
-					winners->push_back(PlayersInLobby->at(i));
+				if (PlayersInLobby.at(i)->score > winners.at(0)->score) {
+					winners.erase(winners.begin(), winners.end());
+					winners.push_back(PlayersInLobby.at(i));
+				} else if (PlayersInLobby.at(i)->score == winners.at(0)->score) {
+					winners.push_back(PlayersInLobby.at(i));
 				}
 			}
 
-			if (winners->size() > 1) {
+			if (winners.size() > 1) {
 				temp += "GAME OVER\n";
 				temp += "It's a tie! With a score of ";
-				temp += winners->front()->score;
+				temp += winners.front()->score;
 				temp += ", the winners are ";
-				for (int i = 0; i < winners->size(); ++i) {
-					temp += winners->at(i)->DisplayName();
+				for (int i = 0; i < winners.size(); ++i) {
+					temp += winners.at(i)->DisplayName();
 					temp += ", ";
-					if (i == winners->size()-2) {
+					if (i == winners.size()-2) {
 						temp += "and ";
 					}
 				}
@@ -87,9 +84,9 @@ void Lobby::LobbyLoop() {
 			} else {
 				temp += "GAME OVER\n";
 				temp += "With a score of ";
-				temp += winners->front()->score;
+				temp += winners.front()->score;
 				temp += ", the winner is ";
-				temp += winners->front()->DisplayName();
+				temp += winners.front()->DisplayName();
 				temp += '\n';
 			}
 
@@ -98,7 +95,7 @@ void Lobby::LobbyLoop() {
 			toPlayer[temp.size()] = '\0';
 
 			for (int i = 0; i < playerCount; ++i) {
-				PlayersInLobby->at(i)->SendToPlayer(toPlayer);
+				PlayersInLobby.at(i)->SendToPlayer(toPlayer);
 			}
 
 		delete game;
@@ -111,15 +108,15 @@ void Lobby::LobbyLoop() {
 
 }
 
-void Lobby::RunGame(int virtservs, std::vector<Player*>* PlayersInLobby) {
+void Lobby::RunGame(int virtservs) {
 
 	// Kick off the game logic here.
 	Player* p;
-	for (vector<Player*>::iterator i = PlayersInLobby->begin(); i != PlayersInLobby->end(); ++i) {
+	for (vector<Player*>::iterator i = PlayersInLobby.begin(); i != PlayersInLobby.end(); ++i) {
 		p = *i;
 		p->SendToPlayer((char*)"GAME STARTING");
 	}
-	game = new Game(MaxPlayers + 3, PlayersInLobby);
+	game = new Game(virtservs, &PlayersInLobby);
 	gameActive = true;
 	// Maybe put a little bit of a break here
 
@@ -128,7 +125,7 @@ void Lobby::RunGame(int virtservs, std::vector<Player*>* PlayersInLobby) {
 void Lobby::AddPlayer(SocketConnection* client, bool isHost) {
 
 	Player* p = new Player(client, isHost, (char*)"SomeGeneratedDisplayName");
-	PlayersInLobby->push_back(p);
+	PlayersInLobby.push_back(p);
 	std::thread clientThread(&Lobby::ClientListener, this, p, isHost);
 	clientThread.detach(); // Potentially dangerous; revisit when you feel like making a safe program
 	playerCount++;
@@ -139,7 +136,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	while (*ThreadContinue && player->IsAlive()) {
 
-		char** args = new char*[25];
+		char** args;
 		args = player->ReadFromPlayer();
 		if  (args == NULL) {
 			break;
@@ -185,7 +182,7 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 				temp += args[1];
 
 				Player* p;
-				for (vector<Player*>::iterator i = PlayersInLobby->begin(); i != PlayersInLobby->end(); ++i) {
+				for (vector<Player*>::iterator i = PlayersInLobby.begin(); i != PlayersInLobby.end(); ++i) {
 					
 					p = *i;
 				
@@ -202,8 +199,8 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 				delete args; // free(args);
 			} else if (strcmp(args[0], "listplayers") == 0) {
 				std::string temp = "\n";
-				for (int i = 0; i < PlayersInLobby->size(); ++i) {
-					temp += PlayersInLobby->at(i)->DisplayName();
+				for (int i = 0; i < PlayersInLobby.size(); ++i) {
+					temp += PlayersInLobby.at(i)->DisplayName();
 					temp += '\n';
 				}
 				temp += '\n';
@@ -245,13 +242,13 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 			else if (player->IsHost()) { // host commands
 
 				if (strcmp(args[0], "rungame") == 0) {
-					RunGame(playerCount + 4, PlayersInLobby);
+					RunGame(playerCount + 4);
 					delete args; // free(args);
 				} else if (strcmp(args[0], "boot") == 0) {
 					for (int i = 0; i < playerCount; ++i) {
 						char* tok = strtok(args[1], "\n");
-						if (strcmp(PlayersInLobby->at(i)->DisplayName(), tok) == 0) {
-							PlayersInLobby->at(i)->KillPlayer();
+						if (strcmp(PlayersInLobby.at(i)->DisplayName(), tok) == 0) {
+							PlayersInLobby.at(i)->KillPlayer();
 						}
 					}
 					delete args; // free(args);
@@ -265,12 +262,12 @@ void Lobby::ClientListener(Player* player, bool isHost) {
 
 	// After connection broken, remove Player from List of Players, playerCount--, kill Client connection.
 	// If host quits, assign new player to be the host.
-	std::remove(PlayersInLobby->begin(), PlayersInLobby->end(), player); // this line is busted
+	std::remove(PlayersInLobby.begin(), PlayersInLobby.end(), player);
 	playerCount--;
 	if (playerCount == 0) {
 		this->KillLobby();
 	} else if (player->IsHost()) {
-		PlayersInLobby->front()->SwapHost();
+		PlayersInLobby.front()->SwapHost();
 	}
 
 	player->KillPlayer();

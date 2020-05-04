@@ -71,7 +71,7 @@ class SocketConnection {
 		 * @param: int len - the number of bytes of data to read
 		 * @return: void* - Pointer to the data read from the socket
 		 */
-		void* ReadFromStream(int len);
+		char* ReadFromStream(int len);
 
 		/* Used in listening SocketConnections, generates new socket connections used for actual communication
 		 * @return: SocketConnection<T>* - a pointer to a new SocketConnection that can be used for communication between hosts.

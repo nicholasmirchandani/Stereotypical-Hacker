@@ -35,47 +35,101 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 
 	int hostnum = 1;
 
+	vector<string> usernamevec;
+	vector<string> passwordvec;
+
+	ifstream usernames("usernames.txt");
+	ifstream passwords("passwords.txt");
+
+	string temp;
+	while (getline(usernames, temp)) {
+		usernamevec.push_back(temp);
+	}
+	while (getline(passwords, temp)) {
+		passwordvec.push_back(temp);
+	}
+
+	usernames.close();
+	passwords.close();
+
+	cout << "DEBUG GOT HERE" << endl;
 
 	for (int servs = 0; servs < virtualServerNumber; ++servs) {
 
-		ifstream usernames("usernames.txt");
-		ifstream passwords("passwords.txt");
-	
+		/* Pulling random usernames and passwords to populate servers */
 		char* rootuser = new char[50];
 		char* rootpass = new char[50];
 
 		char** otherusers = new char*[10];
 		char** otherpasses = new char*[10];
 
-		int totalusers = 0;
+		int usednums[11];
 
-		int userlimit = (rand()%200)+50;
-		for (int i = 0; i <= userlimit; ++i) {
+		for (int i = 0; i < 10; ++i) {
 
-			if (totalusers < 10 && (rand()%30) == 0 && i < userlimit) {
-				
-				otherusers[totalusers] = new char[50];
-				otherpasses[totalusers] = new char[50];
-
-				usernames.getline(otherusers[totalusers], 50);
-				passwords.getline(otherpasses[totalusers++], 50);
-
+			usednums[i] = rand()%800;
+			bool isused = false;
+			for (int j = 0; j < i; ++j) {
+				if (usednums[j] == usednums[i]) {
+					isused = true;
+				}
 			}
-			usernames.ignore(100, '\n');
-			passwords.ignore(100, '\n');
+
+			while (isused) {
+				usednums[i] = rand()%800;
+				isused = false;
+				for (int j = 0; j < i; ++j) {
+					if (usednums[j] == usednums[i]) {
+						isused = true;
+					}
+				}				
+			}
+
+			string uptemp = usernamevec.at(usednums[i]);
+			otherusers[i] = new char[uptemp.size()+1];
+			copy(uptemp.begin(), uptemp.end(), otherusers[i]);
+			otherusers[i][uptemp.size()] = '\0';
+
+			uptemp = passwordvec.at(usednums[i]);
+			otherpasses[i] = new char[uptemp.size()+1];
+			copy(uptemp.begin(), uptemp.end(), otherpasses[i]);
+			otherpasses[i][uptemp.size()] = '\0';			
 
 		}
 
-		usernames.getline(rootuser, 50);
-		passwords.getline(rootpass, 50);
+		usednums[10] = rand()%800;
+		bool isused = false;
+		for (int j = 0; j < 10; ++j) {
+			if (usednums[j] == usednums[10]) {
+				isused = true;
+			}
+		}
 
-		// serv->SetRoot(rootuser, rootpass);
-		usernames.close();
-		passwords.close();
+		while (isused) {
+			usednums[10] = rand()%800;
+			isused = false;
+			for (int j = 0; j < 10; ++j) {
+				if (usednums[j] == usednums[10]) {
+					isused = true;
+				}
+			}				
+		}
 
+		string uptemp = usernamevec.at(usednums[10]);
+		rootuser = new char[uptemp.size()+1];
+		copy(uptemp.begin(), uptemp.end(), rootuser);
+		rootuser[uptemp.size()] = '\0';
+
+		uptemp = passwordvec.at(usednums[10]);
+		rootpass = new char[uptemp.size()+1];
+		copy(uptemp.begin(), uptemp.end(), rootpass);
+		rootpass[uptemp.size()] = '\0';
+
+
+		/* Building the filesystem */
 		char* hostIP = new char[15];
-		sprintf(hostIP, (char*)"192.168.1.%d", (hostnum++*4));
-		VirtualServer* serv = new VirtualServer(hostIP, rootuser, rootpass, otherusers, otherpasses, totalusers);
+		sprintf(hostIP, (char*)"192.168.1.%d", (hostnum++ * 4));
+		VirtualServer* serv = new VirtualServer(hostIP, rootuser, rootpass, otherusers, otherpasses, 10);
 
 		// usr directory with usernames and little readable notes
 		Directory* usr = new Directory((char*)"usr");
@@ -89,8 +143,8 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 		Directory* otheruserdir;
 		VirtualFile* otheruserfile;
 
-		int rootplacement = rand()%(totalusers-1);
-		for (int i = 0; i < totalusers; ++i) {
+		int rootplacement = rand()%10;
+		for (int i = 0; i < 10; ++i) {
 
 			if (i == rootplacement)
 				usr->AddSubdir(rootuserdir);
@@ -127,10 +181,9 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 		Directory* etc = new Directory((char*)"etc");
 		serv->AddSubdir(etc);
 
-		rootplacement = rand()%(totalusers-1);
 		hash<string> strhasher;
 		string temp = "";
-		for (int i = 0; i < totalusers; ++i) {
+		for (int i = 0; i < 10; ++i) {
 			if (i == rootplacement) {
 				temp += serv->rootuser;
 				temp += ':';
@@ -168,14 +221,14 @@ void Game::LS(Player* p, char** args) {
 	string temp = "\n";
 
 	Directory* dir;
-	for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+	for (vector<Directory*>::iterator i = p->cwd->subdirectories.begin(); i != p->cwd->subdirectories.end(); ++i) {
 		dir = *i;
 		temp += dir->name;
 		temp += "  ";
 	}
 
 	VirtualFile* vir;
-	for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+	for (vector<VirtualFile*>::iterator i = p->cwd->files.begin(); i != p->cwd->files.end(); ++i) {
 		vir = *i;
 		temp += vir->name;
 		temp += "  ";
@@ -202,7 +255,7 @@ void Game::READ(Player* p, char** args) {
 	char* filename = strtok(args[1], "\n");
 
 	VirtualFile* vir;
-	for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+	for (vector<VirtualFile*>::iterator i = p->cwd->files.begin(); i != p->cwd->files.end(); ++i) {
 		vir = *i;
 		
 		if (fileFound)
@@ -227,7 +280,7 @@ void Game::READ(Player* p, char** args) {
 	}
 
 	Directory* dir;
-	for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+	for (vector<Directory*>::iterator i = p->cwd->subdirectories.begin(); i != p->cwd->subdirectories.end(); ++i) {
 		dir = *i;
 		
 		if (fileFound)
@@ -270,7 +323,7 @@ void Game::EXEC(Player* p, char** args) {
 		bool fileFound = false;
 		char* filename = strtok(args[2], "\n");
 		VirtualFile* vir;
-		for (vector<VirtualFile*>::iterator i = p->cwd->files->begin(); i != p->cwd->files->end(); ++i) {
+		for (vector<VirtualFile*>::iterator i = p->cwd->files.begin(); i != p->cwd->files.end(); ++i) {
 			vir = *i;
 			
 			if (fileFound)
@@ -418,7 +471,7 @@ void Game::CD(Player* p, char** args) {
 		bool fileFound = false;
 
 		Directory* dir;
-		for (vector<Directory*>::iterator i = p->cwd->subdirectories->begin(); i != p->cwd->subdirectories->end(); ++i) {
+		for (vector<Directory*>::iterator i = p->cwd->subdirectories.begin(); i != p->cwd->subdirectories.end(); ++i) {
 			dir = *i;
 		
 			if (fileFound)

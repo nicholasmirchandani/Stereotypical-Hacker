@@ -27,7 +27,7 @@ class Lobby {
 
 		std::thread* LobbyThread;
 
-		std::vector<Player*>* PlayersInLobby; // A list of clients in the lobby
+		std::vector<Player*> PlayersInLobby; // A list of clients in the lobby
 
 		bool lobbyStillAlive = true;
 		bool* ThreadContinue;
@@ -37,7 +37,7 @@ class Lobby {
 		~Lobby();
 
 		void LobbyLoop(); // Started in new thread in constructor.
-		void RunGame(int virtservs, std::vector<Player*>* PlayersInLobby);
+		void RunGame(int virtservs);
 
 		void AddPlayer(SocketConnection* client, bool isHost);
 		void ClientListener(Player* player, bool isHost);
