@@ -42,8 +42,6 @@ char** Player::ReadFromPlayer() {
 	try {
 		
 		fromClient = socket->ReadFromStream(500);
-		std::cout << "From client raw: " << fromClient << std::endl << std::flush;
-		std::cout << "Garbage character: " << (int)fromClient[strlen(fromClient)-1] << std::endl << std::flush;
 		
 		tok = strtok(fromClient, " \n");
 		int i  = 0;
@@ -57,9 +55,14 @@ char** Player::ReadFromPlayer() {
 					strcat(temptok, tok);
 				tok = temptok;
 			} else {
-				args[i++] = tok;
+				args[i] = new char[strlen(tok)];
+				strcpy(args[i++], tok);
 				tok = strtok(NULL, " \n");
 			}
+		}
+
+		for (i; i < 25; ++i) {
+			args[i] = NULL;
 		}
 
 		return args;

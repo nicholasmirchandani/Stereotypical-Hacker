@@ -22,39 +22,53 @@
 
 using namespace std;
 
+
+Game::Game() {
+	activePlayers = NULL;
+}
+
 // Sets up virtual servers/file systems and assigns players to each
 Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 
 	// ifstream config;
 	// config.open("GameConfig.txt");
-
 	activePlayers = playerList;
 	servers = new vector<VirtualServer*>();
 	serversRemaining = virtualServerNumber;
+	// this->init();
+
+}
+
+void Game::init() {
+
 	srand(time(NULL));
 
 	int hostnum = 1;
 
-	vector<string> usernamevec;
-	vector<string> passwordvec;
+	vector<string*>* usernamevec = new vector<string*>();
+	vector<string*>* passwordvec = new vector<string*>();
 
 	ifstream usernames("usernames.txt");
 	ifstream passwords("passwords.txt");
 
 	string temp;
+	string* othtemp;
 	while (getline(usernames, temp)) {
-		usernamevec.push_back(temp);
+		if (temp.size() > 0)
+			othtemp = new string(temp);
+			usernamevec->push_back(othtemp);
 	}
 	while (getline(passwords, temp)) {
-		passwordvec.push_back(temp);
+		if (temp.size() > 0)
+			othtemp = new string(temp);
+			passwordvec->push_back(othtemp);
 	}
 
 	usernames.close();
 	passwords.close();
 
-	cout << "DEBUG GOT HERE" << endl;
 
-	for (int servs = 0; servs < virtualServerNumber; ++servs) {
+	for (int servs = 0; servs < serversRemaining; ++servs) {
 
 		/* Pulling random usernames and passwords to populate servers */
 		char* rootuser = new char[50];
@@ -85,12 +99,12 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 				}				
 			}
 
-			string uptemp = usernamevec.at(usednums[i]);
+			string uptemp = *usernamevec->at(usednums[i]);
 			otherusers[i] = new char[uptemp.size()+1];
 			copy(uptemp.begin(), uptemp.end(), otherusers[i]);
 			otherusers[i][uptemp.size()] = '\0';
 
-			uptemp = passwordvec.at(usednums[i]);
+			uptemp = *passwordvec->at(usednums[i]);
 			otherpasses[i] = new char[uptemp.size()+1];
 			copy(uptemp.begin(), uptemp.end(), otherpasses[i]);
 			otherpasses[i][uptemp.size()] = '\0';			
@@ -115,12 +129,12 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 			}				
 		}
 
-		string uptemp = usernamevec.at(usednums[10]);
+		string uptemp = *usernamevec->at(usednums[10]);
 		rootuser = new char[uptemp.size()+1];
 		copy(uptemp.begin(), uptemp.end(), rootuser);
 		rootuser[uptemp.size()] = '\0';
 
-		uptemp = passwordvec.at(usednums[10]);
+		uptemp = *passwordvec->at(usednums[10]);
 		rootpass = new char[uptemp.size()+1];
 		copy(uptemp.begin(), uptemp.end(), rootpass);
 		rootpass[uptemp.size()] = '\0';
@@ -161,6 +175,7 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 
 			otheruserdir = new Directory(activePlayers->at(i)->DisplayName());
 			usr->AddSubdir(otheruserdir);
+
 
 			otheruserfile = new VirtualFile('t', 'a', (char*)"notefromsysadmin.txt", (char*)"Filthy, no-good hacker\nBoot off server on sight\n");
 			otheruserdir->AddFile(otheruserfile);
@@ -206,6 +221,13 @@ Game::Game(int virtualServerNumber, vector<Player*>* playerList) {
 
 	}
 
+
+	usernamevec->clear();
+	passwordvec->clear();
+
+	delete usernamevec;
+	delete passwordvec;
+
 	for (int n = 0; n < activePlayers->size(); ++n) {
 
 		activePlayers->at(n)->cwd = servers->at(n);
@@ -241,7 +263,14 @@ void Game::LS(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -307,7 +336,14 @@ void Game::READ(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -393,7 +429,14 @@ void Game::EXEC(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -428,7 +471,14 @@ void Game::CAP(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -450,6 +500,7 @@ void Game::PWD(Player* p) {
 
 	p->SendToPlayer(toPlayer);
 
+	delete[] toPlayer;
 }
 
 // Changes player's working directory
@@ -501,7 +552,14 @@ void Game::CD(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -526,7 +584,14 @@ void Game::SSH(Player* p, char** args) {
 
 		p->SendToPlayer(toPlayer);
 
-		delete args; //free(args);
+		delete[] toPlayer;
+		for (int i = 0; i < 25; ++i) {
+			if (args[i] == NULL)
+				break;
+			else
+				delete[] args[i];
+		}
+		delete[] args; //free(args);
 		return;
 	}
 
@@ -589,7 +654,14 @@ void Game::SSH(Player* p, char** args) {
 
 	p->SendToPlayer(toPlayer);
 
-	delete args; //free(args);
+	delete[] toPlayer;
+	for (int i = 0; i < 25; ++i) {
+		if (args[i] == NULL)
+			break;
+		else
+			delete[] args[i];
+	}
+	delete[] args; //free(args);
 
 }
 
@@ -624,6 +696,7 @@ void Game::HELP(Player* p) {
 
 	p->SendToPlayer(toPlayer);
 
+	delete[] toPlayer;
 }
 
 int Game::ServersRemaining() {

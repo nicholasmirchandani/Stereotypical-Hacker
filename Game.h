@@ -26,7 +26,10 @@ class Game {
 
 	public:
 		vector<Player*>* activePlayers; // update Lobby.cpp to integrate this whole thing with CD and dead connections
+		Game();
 		Game(int virtualServerNumber, vector<Player*>* playerList); // Maybe read in a file to build the "servers"
+		
+		void init(); // Called in the constructor to hopefully fix a corrupted size issue
 
 		void LS(Player* p, char** args); // Lists items in current directory
 		void READ(Player* p, char** args); // Prints contents of a file, accept cat as an alias
