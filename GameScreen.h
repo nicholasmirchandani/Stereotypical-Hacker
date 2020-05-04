@@ -6,6 +6,7 @@
 
 #include "Tilemap.h"
 #include <string>
+#include <thread>
 
 using namespace std;
 
@@ -24,7 +25,8 @@ class GameScreen {
 		void updateTerminal();
 		bool phraseComplete();
 		
-		bool run(int phraseAmt, string* phrases, bool debug);	// Returns true upon successful completion, false upon forfeit.
+		void run(int phraseAmt, string* phrases, bool* endEarly, bool debug);	// Returns true upon successful completion, false upon forfeit.
+		void runThread(int phraseAmt, string* phrases, bool* endEarly, bool debug);
 
 	private:
 		string phrase;

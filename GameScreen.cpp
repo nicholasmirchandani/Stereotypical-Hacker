@@ -55,6 +55,7 @@ bool GameScreen::charTyped(char typed) {
 	if((int)typed == 127) {	// Ignore backspaces.
 		return true;
 	}
+	
 	if(typed == phrase[index]) {
 		updateCursor(false);
 		index++;
@@ -102,7 +103,7 @@ void GameScreen::updateCursor(bool active) {
 }
 
 
-bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
+void GameScreen::run(int phraseAmt, string* phrases, bool* endEarly, bool debug) {
 	
 	// Prepare info labels.
 	this->getTilemap()->writeString(0, 1, "Last key pressed:");
@@ -123,7 +124,11 @@ bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
 		// While the phrase is not yet complete...
 		while(!this->phraseComplete()) {
 			
-			//cout << (int)userInput;
+			cout << (int)userInput;
+			// ...check if it needs to end early...
+			if(*endEarly) {
+				break;
+			}
 
 			// ...get keypress from user...
 			system("stty raw");
@@ -134,10 +139,9 @@ bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
 			if(userInput == '[' && debug) {	// Skip a phrase in debug mode.
 				break;
 			}
-			if(userInput == ']') {	// Forfeit this entire battle.
-				return false;
+			if(userInput == ']' || (int)userInput == 3) {	// Forfeit this entire battle.
+				*endEarly = true;
 			}
-			
 			
 			this->charTyped(userInput);
 
@@ -149,7 +153,19 @@ bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
 			this->updateTerminal();
 			
 		}
+		
+		if(*endEarly) {
+			break;
+		}
 	}
 	
-	return true;
+	
+}
+
+void GameScreen::runThread(int phraseAmt, string* phrases, bool* endEarly, bool debug) {
+	
+	thread gsThread(&GameScreen::run, this, phraseAmt, phrases, endEarly, false);
+	
+	gsThread.join();
+	
 }

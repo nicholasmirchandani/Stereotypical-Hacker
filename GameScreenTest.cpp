@@ -20,8 +20,9 @@ int main(int argc, char** argv) {
 	};
 	
 	GameScreen *gScrn = new GameScreen();
-
-	gScrn->run(phraseAmt, phrases, false);
+	bool* endEarly = new bool(false);
+	
+	gScrn->runThread(phraseAmt, phrases, endEarly, false);
 	
 	delete gScrn;
 	
