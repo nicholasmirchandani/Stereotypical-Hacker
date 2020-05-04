@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
+#include "Player.h"
 
 void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
@@ -51,8 +52,8 @@ int main() {
     //playGame(p1Socket, p2Socket);
 
     // Step 6: Close the connections
-    close(p2Socket);
-    close(p1Socket);
+    close(p1.socket);
+    close(p2.socket);
     return 0;
 }
 
