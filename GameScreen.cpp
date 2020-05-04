@@ -110,7 +110,7 @@ bool GameScreen::run(int phraseAmt, string* phrases, bool debug) {
 	this->getTilemap()->writeString(0, 3, "Misses:");
 	this->getTilemap()->writeString(0, 4, "Press ']' to forfeit the battle.");
 	if(debug) {
-		this->getTilemap()->writeString(0, 4, "Press '[' to skip a phrase (Debug only)");
+		this->getTilemap()->writeString(0, 5, "Press '[' to skip a phrase (Debug only)");
 	}
 
 	// Loop for each phrase.
