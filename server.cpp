@@ -36,7 +36,7 @@ int main() {
     unsigned int client_len = sizeof(struct sockaddr_in);
     Player p1;
     Player p2;    
-    
+
     //TODO: Lobby system to make the players start at the same time
     //Interweaving accept and thread calls so player doesn't have to wait for other to connect to begin
     p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
@@ -111,8 +111,13 @@ void listenPlayer(int playerSocket) {
         } else if(command == "ssh") {
             temp = "PRINT: Unimplemented command: ssh";    
         } else if(command == "quit") {
-            //Send all commands back to client if it isn't quit
+            //Quit signals the client and server to both end
             temp = "QUITGAME: ";
+            //Sending message to client here so can break without the client not receiving the message
+            char* toClient = new char[temp.size()+1];
+            std::copy(temp.begin(), temp.end(), toClient);
+            toClient[temp.size()] = '\0';
+            write(playerSocket, toClient, strlen(toClient));
             break;
         } else {
             //Send all commands back to client if it isn't quit
