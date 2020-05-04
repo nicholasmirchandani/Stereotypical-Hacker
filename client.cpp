@@ -41,25 +41,26 @@ int main() {
 
     //CONSOLE CODE:
     std::string command;
+    char buffer[100];
     while(true) {
         std::cout << username << "$ " << std::flush;
         std::getline(std::cin, command);
-        std::cout << "Command entered: " << command;
+        std::cout << "Command entered: " << command << std::endl;
 
         //Send all commands to server, regardless of what they are
-        char* toServer = new char[temp.size()+1];
-        copy(temp.begin(), temp.end(), toServer);
-        toServer[temp.size()] = '\0';
+        char* toServer = new char[command.size()+1];
+        std::copy(command.begin(), command.end(), toServer);
+        toServer[command.size()] = '\0';
         write(sockfd, toServer, strlen(toServer));
         delete(toServer);
 
         //Command specific client behavior going to be defined by the server in the end
-        char buffer[100];
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(sockfd, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         std::string serverResponse(buffer); 
 
         //Going to assume PRINT: as a prefix for everything the client's supposed to print
+        std::cout << "Server Response Substring: " << serverResponse.substr(0,6) << std::endl;
         if(serverResponse.substr(0,6) == "PRINT:") {
             std::cout << serverResponse.substr(6);
         }

@@ -71,11 +71,11 @@ void listenPlayer(int playerSocket) {
             break;
         } else {
             //Send all commands back to client if it isn't quit
-            temp = "PRINT:" + "Server received " + command;
+            temp = "PRINT: Server received " + command;
         }
         //Always send a message back to the player, to prevent it from waiting forever
         char* toClient = new char[temp.size()+1];
-        copy(temp.begin(), temp.end(), toClient);
+        std::copy(temp.begin(), temp.end(), toClient);
         toClient[temp.size()] = '\0';
         write(playerSocket, toClient, strlen(toClient));
     }
