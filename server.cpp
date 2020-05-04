@@ -66,13 +66,54 @@ void listenPlayer(int playerSocket) {
         fflush(stdout);
         std::string command(buffer);
         std::string temp;
-        if(command == "quit") {
+        if(command == "help") {
+            //Help simply sends a long string with all available user commands
+            temp = "PRINT: \n  --- USER COMMANDS ---\n\n";
+	        
+            temp += "ls - Lists all files and subdirectories in current directory\n";
+            temp += "   Usage: ls\n\n";
+
+            temp += "read - Prints contents of a text file to console\n";
+            temp += "   Usage: read <text-file>\n\n";
+
+            temp += "exec - Executes any executable file in /bin directory\n";
+            temp += "   Usage: exec <executable-file> <executable-arguments>\n\n";
+
+            temp += "cap - Captures server, given root credentials\n";
+            temp += "   Usage: cap <username> <password>\n\n";
+
+            temp += "pwd - Prints user's current directory to console\n";
+            temp += "   Usage: pwd\n\n";
+
+            temp += "cd - Changes user's current directory\n";
+            temp += "   Usage: cd <destination-directory>  OR  cd ..  to move up a directory\n\n";
+
+            temp += "ssh - Connects to new host on network\n";
+            temp += "   Usage: ssh <host-IP>\n\n";
+
+            temp += "quit - Quits the game\n";
+            temp += "   Usage: quit\n";
+        } else if(command == "ls") {
+            temp = "PRINT: Unimplemented command: ls";    
+        } else if(command == "read" || command == "cat") { //Allowing cat to be an alias for read
+            temp = "PRINT: Unimplemented command: read";    
+        } else if(command == "exec") {
+            temp = "PRINT: Unimplemented command: exec";    
+        } else if (command == "cap") {
+            temp = "PRINT: Unimplemented command: cap";  
+        } else if (command == "pwd") {
+            temp = "PRINT: Unimplemented command: pwd";  
+        } else if (command == "cd") {
+            temp = "PRINT: Unimplemented command: cd"; 
+        } else if(command == "ssh") {
+            temp = "PRINT: Unimplemented command: ssh";    
+        } else if(command == "quit") {
             //Send all commands back to client if it isn't quit
-            temp = "QUITGAME:";
+            temp = "QUITGAME: ";
             break;
         } else {
             //Send all commands back to client if it isn't quit
-            temp = "PRINT: Server received " + command;
+            temp = "PRINT: Unknown command: " + command;
         }
         //Always send a message back to the player, to prevent it from waiting forever
         char* toClient = new char[temp.size()+1];

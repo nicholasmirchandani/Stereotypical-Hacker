@@ -41,15 +41,16 @@ int main() {
 
     //CONSOLE CODE:
     std::string command;
-    char buffer[100];
+    char buffer[1000]; //Buffer 1000 instead of 100 to handle help easily
     while(true) {
         std::cout << username << "$ " << std::flush;
         std::getline(std::cin, command);
-        std::cout << "Command entered: " << command << std::endl;
-        //On just a newline with no input, just continue as if nothing happened
+
+        //If the player just types a newline, just continue as if nothing happened
         if(command.size() == 0) {
             continue;
         }
+
         //Send all commands to server, regardless of what they are
         char* toServer = new char[command.size()+1];
         std::copy(command.begin(), command.end(), toServer);
@@ -64,7 +65,7 @@ int main() {
 
         //Going to assume PRINT: as a prefix for everything the client's supposed to print
         if(serverResponse.substr(0,7) == "PRINT: ") {
-            std::cout << serverResponse.substr(7);
+            std::cout << serverResponse.substr(7) << std::endl;
         }
 
         /*  Commented out to focus on framework
@@ -72,8 +73,8 @@ int main() {
             playGame(sockfd);
         */
 
-        if(command == "quit") {
-            //When they type quit, end the program after the server's done its duties
+        if(serverResponse == "QUITGAME: ") {
+            //When the server instructs the client to quit, the client quits
             break;
         }
     }
