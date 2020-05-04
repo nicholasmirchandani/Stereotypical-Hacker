@@ -36,14 +36,17 @@ int main() {
     unsigned int client_len = sizeof(struct sockaddr_in);
     Player p1;
     Player p2;    
+    
+    //TODO: Lobby system to make the players start at the same time
+    //Interweaving accept and thread calls so player doesn't have to wait for other to connect to begin
     p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
+    std::thread listenP1(listenPlayer, p1.socket);
     p2.socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
+    std::thread listenP2(listenPlayer, p2.socket);
 
     //Close the listening socket after we've connected our 2 players
     close(listeningSocket);
 
-    std::thread listenP1(listenPlayer, p1.socket);
-    std::thread listenP2(listenPlayer, p2.socket);
 
     listenP1.join();
     listenP2.join();
