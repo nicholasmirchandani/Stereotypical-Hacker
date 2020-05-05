@@ -5,6 +5,7 @@
 class VirtualServer {
 public:
     VirtualServer();
+    ~VirtualServer();
     bool captureServer(std::string username, std::string password);
 
     std::string ip; //Stored as a string for easy comparison for the server

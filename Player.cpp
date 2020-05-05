@@ -6,3 +6,7 @@ Player::Player() {
     score = 0;
     currentServer = nullptr;
 }
+
+Player::~Player() {
+    //Empty Default Destructor
+}

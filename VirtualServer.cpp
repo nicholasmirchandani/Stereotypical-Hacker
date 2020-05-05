@@ -8,6 +8,10 @@ VirtualServer::VirtualServer() {
     Player* currentPlayer = nullptr;
 }
 
+VirtualServer:~VirtualServer() {
+    //Empty default destructor
+}
+
 bool VirtualServer::captureServer(std::string username, std::string password) {
     if(username == rootUser && password == rootPass) {
         captured = true;
