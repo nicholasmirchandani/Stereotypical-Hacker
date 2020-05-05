@@ -148,7 +148,7 @@ void listenPlayer(Player* player) {
             temp += "   Usage: quit\n";
         } else if(command == "leaderboard") {
             temp = "PRINT: ";
-            temp += "Username: \tScore:"
+            temp += "Username: \tScore:";
             for(Player* p in players) {
                 temp += p->username + "\t" + p->score + "\n";
             }
