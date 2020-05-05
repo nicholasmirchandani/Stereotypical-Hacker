@@ -14,7 +14,7 @@
 #include "VirtualServer.h"  //No need to include Player, as it's included in VirtualServer
 
 void initializeServers();
-bool playGame(int p1Socket, int p2Socket);
+bool playGame(int p1Socket, int p2Socket, std::string targetSentence);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(Player* player);
 
@@ -258,7 +258,7 @@ void listenPlayer(Player* player) {
                         write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
 
                         //Once synchronization is out of the way, start the game
-                        if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket)) {
+                        if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
                             //P2 Won!
                             //Disconnect original player from the server; Connecting winning user to the server is handled below
                             serverList[targetIndex].currentPlayer->currentServer = nullptr;
@@ -362,7 +362,7 @@ void initializeServers() {
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 
 //Returns false if p1 wins, true if p2 wins
-bool playGame(int p1Socket, int p2Socket) {
+bool playGame(int p1Socket, int p2Socket, std::string targetSentence) {
     std::cout << "DEBUG: Playing game" << std::endl;
     int p1Index = 0;
     int p2Index = 0;
@@ -401,6 +401,7 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
         if(len == 3) {
             break; //If len is 3, it's just 'ACK' to a 'FIN'
         }
+        //TODO: Ensure character is correct before incrementing index
         *index = *index + 1; //Incrementing index whenever a packet is received.
         if(*index >= targetSentence.length()) {
             *gameOver = true;
