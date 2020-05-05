@@ -260,7 +260,7 @@ void listenPlayer(Player* player) {
                         //Waiting for both players to respond with something
                         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
                         int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-                        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
+                        printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
                         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
