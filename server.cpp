@@ -283,11 +283,15 @@ void initializeServers() {
         std::string temp;
         while(!users_is.eof()) {
             getline(users_is, temp);
-            usernames_vec.insert(usernames_vec.end(), temp);
+            if(temp != "") {
+                usernames_vec.insert(usernames_vec.end(), temp);
+            }
         }
         while(!passwords_is.eof()) {
             getline(passwords_is, temp);
-            passwords_vec.insert(passwords_vec.end(), temp);
+            if(temp != "") {
+                passwords_vec.insert(passwords_vec.end(), temp);
+            }
         }
 
         for(std::string s : usernames_vec) {
