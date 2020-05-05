@@ -9,8 +9,8 @@ public:
     std::string rootUser;
     std::string rootPass;
     std::map<std::string, std::string> users; //Using a map for username and password to keep them tied to the same user since it's in std
-};
 
-bool captured;
-Player* currentPlayer;
+    bool captured;
+    Player* currentPlayer;
+};
 #endif
