@@ -316,6 +316,7 @@ void initializeServers() {
         }
 
         vs.ip = "192.168.1." + std::to_string(i);
+        vs.captured = false;
         serverList.insert(serverList.end(), vs);
     }
 }
