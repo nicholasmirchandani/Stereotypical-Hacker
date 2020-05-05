@@ -299,9 +299,6 @@ void initializeServers() {
         int numUsers = rand() % 6 + 5; //numUsers is 5-10
         int rootNum = rand() % numUsers;
         for(int j = 0; j < numUsers; ++j) {
-            vs.rootUser = "admin";
-            vs.rootPass = "admin";
-            vs.users.insert(std::pair<std::string, std::string>("admin", "admin"));
         ///If the username isn't unique within the collection, regenerate it
         regenerateUsername:
             std::string tempUser = usernames_vec[rand() % usernames_vec.size()];
