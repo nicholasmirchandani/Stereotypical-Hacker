@@ -83,7 +83,7 @@ void listenPlayer(int playerSocket) {
                     command = temp.substr(0, i);
                     j = i;
                 } else {
-                    arguments.insert(temp.substr(j, i-j));
+                    arguments.insert(arguments.end(), temp.substr(j, i-j));
                     j = i;
                 }
             }
