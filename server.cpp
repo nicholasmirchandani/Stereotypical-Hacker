@@ -71,8 +71,14 @@ int main() {
 
 //TODO: Pass player here instead of an int for better debug
 void listenPlayer(Player* player) {
+    char buffer[100];
+    memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+    int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+    printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
+    fflush(stdout);
+    std::string username(buffer);
+    player->username = username;
     while(true) {
-        char buffer[100];
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage

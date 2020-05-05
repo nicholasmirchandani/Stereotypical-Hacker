@@ -39,6 +39,13 @@ int main() {
     std::getline(std::cin, username);
     std::cout << "Username: '" << username << "' confirmed." << std::endl;
 
+    //Send username to server
+    char* toServer = new char[username.size()+1];
+    std::copy(username.begin(), username.end(), toServer);
+    toServer[username.size()] = '\0';
+    write(sockfd, toServer, strlen(toServer));
+    delete(toServer);
+
     //CONSOLE CODE:
     std::string command;
     char buffer[1000]; //Buffer 1000 instead of 100 to handle help easily
