@@ -86,6 +86,7 @@ void listenPlayer(Player* player) {
     while(true) {
         sem_post(&(player->ready));
         //Leaving space in here for game code to take place; will add spinlock on playingGame if needed
+        while(player->playingGame);
         std::cout << "AFTER SEM_POST for Player " << player->username << std::endl;
         sem_wait(&(player->ready));
         std::cout << "AFTER SEM_WAIT for Player " << player->username << std::endl;
