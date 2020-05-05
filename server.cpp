@@ -5,7 +5,6 @@
 #include <exception> //for std::terminate
 #include <vector> //for std::vector
 #include <fstream> //For ifstream
-#include <semaphore.h> //For C semaphores
 //Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
@@ -15,7 +14,7 @@
 #include "VirtualServer.h"  //No need to include Player, as it's included in VirtualServer
 
 void initializeServers();
-void playGame(int p1Socket, int p2Socket);
+bool playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(Player* player);
 
@@ -27,10 +26,6 @@ int main() {
 
     //Before network code, we need to initialize our serverList of Virtual Servers
     initializeServers();
-
-    //TEST SEMAPHORE CODE TO SEE IF IT ERRORS;
-    sem_t test;
-    sem_init(&test, 0, 0);
 
     //Socket code taken from springer and then modified
     int listeningSocket;
@@ -80,6 +75,7 @@ int main() {
 
 //TODO: Pass player here instead of an int for better debug
 void listenPlayer(Player* player) {
+    sem_init(&(player->ready), 0, 1);
     char buffer[100];
     memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
     int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
@@ -88,10 +84,23 @@ void listenPlayer(Player* player) {
     std::string username(buffer);
     player->username = username;
     while(true) {
+        sem_post(player->ready);
+        //Leaving space in here for game code to take place; will add spinlock on playingGame if needed
+        sem_wait(player->ready);
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
         fflush(stdout);
+        if(player -> playingGame) {
+            //If the player is supposed to be playing the game, don't let their commands have any effect
+            //Sending DoNothing so the client doesn't stall
+            std::string temp = "DONOTHING: ";
+            char* toClient = new char[temp.size()+1];
+            std::copy(temp.begin(), temp.end(), toClient);
+            toClient[temp.size()] = '\0';
+            write(player->socket, toClient, strlen(toClient));
+            continue;
+        }
         std::string command(buffer);
         std::vector<std::string> arguments;
         std::string temp(buffer); //Copying from buffer instead of command because it's probably faster
@@ -238,14 +247,52 @@ void listenPlayer(Player* player) {
                         player->currentServer->currentPlayer = nullptr;
                     }
                     if(serverList[targetIndex].currentPlayer != nullptr) {
-                        //TODO: actually start game here
-                        std::cout << "DEBUG: START GAME!  MULTIPLE PLAYERS ARE CONNECTED TO THE SERVER!" << std::endl;
+                        //Play game: only need to set appropriate vars of other player
+                        serverList[targetIndex].currentPlayer->playingGame = true;
+                        sem_wait(serverList[targetIndex].currentPlayer->ready);
+
+                        //GAME PLAY CODE
+
+                        //Send PLAYGAME: to both clients
+                        temp = "PLAYGAME: ";
+                        char* toClient = new char[temp.size()+1];
+                        std::copy(temp.begin(), temp.end(), toClient);
+                        toClient[temp.size()] = '\0';
+                        write(player->socket, toClient, strlen(toClient));
+                        write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
+                        
+                        //Waiting for both clients to respond (hopefully with an ACK)
+
+                        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+                        int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+                        printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
+                        fflush(stdout);
+
+                        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+                        int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+                        printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
+                        fflush(stdout);
+
+                        //Once synchronization is out of the way, start the game
+                        if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket)) {
+                            //P2 Won!
+                            //Disconnect original player from the server; Connecting winning user to the server is handled below
+                            serverList[targetIndex].currentPlayer->currentServer = nullptr;
+                        } else {
+                            //P1 Won
+                            temp = "PRINT: You lost and thus were kicked from the server" + arguments[0];
+                        }
+
+                        serverList[targetIndex].currentPlayer->playingGame = false;
+                        sem_post(serverList[targetIndex].currentPlayer->ready);
                     }
 
-                    //TODO: Block here until game is complete via semaphores
-                    player->currentServer = &(serverList[targetIndex]);
-                    serverList[targetIndex].currentPlayer = player;
-                    temp = "PRINT: Connected to server at ip address " + arguments[0];
+                    if(serverList[targetIndex].currentPlayer == nullptr) {
+                        //Only connect to the server if nobody's on it (if you won the game or nobody was there in the first place)
+                        player->currentServer = &(serverList[targetIndex]);
+                        serverList[targetIndex].currentPlayer = player;
+                        temp = "PRINT: Connected to server at ip address " + arguments[0];
+                    }
                 }
             }
         } else if(command == "quit") {
@@ -329,7 +376,9 @@ void initializeServers() {
 
 //TODO: Pass player here instead of an int for better debug
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
-void playGame(int p1Socket, int p2Socket) {
+
+//Returns false if p1 wins, true if p2 wins
+bool playGame(int p1Socket, int p2Socket) {
     std::string targetSentence = "This is a new test sentence.";
     int p1Index = 0;
     int p2Index = 0;
@@ -345,10 +394,13 @@ void playGame(int p1Socket, int p2Socket) {
     listenP2.join();
     if (p1Index > p2Index) {
         std::cout << "\rPlayer 1 wins!" << std::endl;
+        return false;
     } else if (p2Index > p1Index) {
         std::cout << "\rPlayer 2 wins!" << std::endl;
+        return true;
     } else {
-        std::cout << "\rPlayers tied!" << std::endl; //NOTE: With the current implementation, this is not technically possible, but if we have some sort of time restriction it's possible both players get to the same character
+        std::cout << "\rPlayers tied!  Player 1 holds." << std::endl; //NOTE: With the current implementation, this is not technically possible, but if we have some sort of time restriction it's possible both players get to the same character
+        return false;
     }
 }
 

@@ -82,10 +82,17 @@ int main() {
             break;
         }
 
-        /*  Commented out to focus on framework
-            //Start Game Code
+        if(serverResponse == "PLAYGAME: ") {
+            //Sending ACK to server
+            std::string temp = "ACK";
+            char* toServer = new char[temp.size()+1];
+            std::copy(temp.begin(), temp.end(), toServer);
+            toServer[temp.size()] = '\0';
+            write(sockfd, toServer, strlen(toServer));
+
+            //Once the synchronization with server is out of the way, play the game
             playGame(sockfd);
-        */
+        }
     }
 
 
