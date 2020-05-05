@@ -221,8 +221,8 @@ void initializeServers() {
         VirtualServer vs;
         vs.ip = "192.168.1." + std::to_string(i);
         vs.rootUser = "admin";
-        vs.rootPassword = "admin";
-        vs.users.insert(pair<std::string, std::string>(vs.rootUser, vs.rootPassword)); //Moreso putting this in for now to check for errors
+        vs.rootPass = "adminPass";
+        vs.users.insert(std::pair<std::string, std::string>(vs.rootUser, vs.rootPass)); //Moreso putting this in for now to check for errors
         //TODO: Initialize Usernames/Passwords including root username/password
         serverList.insert(serverList.end(), vs);
     }
