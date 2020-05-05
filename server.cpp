@@ -373,6 +373,7 @@ void initializeServers() {
 
 //Returns false if p1 wins, true if p2 wins
 bool playGame(int p1Socket, int p2Socket) {
+    std::cout << "DEBUG: Playing game" << std::endl;
     std::string targetSentence = "This is a new test sentence.";
     int p1Index = 0;
     int p2Index = 0;

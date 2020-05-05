@@ -91,6 +91,7 @@ int main() {
             write(sockfd, toServer, strlen(toServer));
 
             //Once the synchronization with server is out of the way, play the game
+            std::cout << "DEBUG: PLAY THE GAME!" << std::endl;
             playGame(sockfd);
         }
     }
