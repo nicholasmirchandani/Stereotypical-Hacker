@@ -149,8 +149,8 @@ void listenPlayer(Player* player) {
         } else if(command == "leaderboard") {
             temp = "PRINT: ";
             temp += "Username: \tScore:";
-            for(Player* p in players) {
-                temp += p->username + "\t" + p->score + "\n";
+            for(Player* p : players) {
+                temp += p->username + "\t" + std::to_string(p->score) + "\n";
             }
         } else if(command == "ls") {
             temp = "PRINT: Unimplemented command: ls";    
