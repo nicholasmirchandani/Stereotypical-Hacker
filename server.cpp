@@ -84,9 +84,9 @@ void listenPlayer(Player* player) {
     std::string username(buffer);
     player->username = username;
     while(true) {
-        sem_post(player->ready);
+        sem_post(&(player->ready));
         //Leaving space in here for game code to take place; will add spinlock on playingGame if needed
-        sem_wait(player->ready);
+        sem_wait(&(player->ready));
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
