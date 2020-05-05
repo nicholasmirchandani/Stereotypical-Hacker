@@ -3,6 +3,7 @@
 #include <cstring> //for memset
 #include <thread> //for std::thread
 #include <exception> //for std::terminate
+#include <vector> //for std::vector
 //Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
