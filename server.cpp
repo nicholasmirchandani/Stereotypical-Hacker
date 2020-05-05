@@ -92,7 +92,7 @@ void listenPlayer(int playerSocket) {
                 }
             }
 
-            if(j != temp.length()) {
+            if(j != temp.length() - 1 && command != temp) {
                 //Adding the last element, not delineated by space
                 arguments.insert(arguments.end(), temp.substr(j));
             }
