@@ -250,7 +250,7 @@ void listenPlayer(Player* player) {
                         //GAME PLAY CODE
 
                         //Send PLAYGAME: to both clients
-                        temp = "PLAYGAME: ";
+                        temp = "PLAYGAME: This is a new test sentence.";
                         char* toClient = new char[temp.size()+1];
                         std::copy(temp.begin(), temp.end(), toClient);
                         toClient[temp.size()] = '\0';
@@ -364,12 +364,8 @@ void initializeServers() {
 //Returns false if p1 wins, true if p2 wins
 bool playGame(int p1Socket, int p2Socket) {
     std::cout << "DEBUG: Playing game" << std::endl;
-    std::string targetSentence = "This is a new test sentence.";
     int p1Index = 0;
     int p2Index = 0;
-    const char* messageToSend = targetSentence.c_str();
-    write(p1Socket, messageToSend, strlen(messageToSend));
-    write(p2Socket, messageToSend, strlen(messageToSend));
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel
     bool gameOver = false;
     std::thread listenP1(listenPlayerGame, p1Socket, p2Socket, &p1Index, targetSentence, &gameOver);

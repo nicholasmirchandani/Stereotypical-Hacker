@@ -12,7 +12,7 @@
 //https://www.tutorialspoint.com/Read-a-character-from-standard-input-without-waiting-for-a-newline-in-Cplusplus
 
 void waitForFIN(int serverSocket, bool* gameOver);
-void playGame(int sockfd);
+void playGame(int sockfd, std::string targetSentence);
 int main() {
     //Network code taken from Springer and then modified
     // Step 1: Create a socket
@@ -84,10 +84,11 @@ int main() {
             break;
         }
 
-        if(serverResponse == "PLAYGAME: ") {
+        //Server's actually combining the packets which is annoying
+        if(serverResponse.substr(0,10) == "PLAYGAME: ") {
             //Once the synchronization with server is out of the way, play the game
             std::cout << "DEBUG: PLAY THE GAME!" << std::endl;
-            playGame(sockfd);
+            playGame(sockfd, serverResponse.substr(10));
         }
     }
 
@@ -98,13 +99,8 @@ int main() {
     return 0;
 }
 
-void playGame(int sockfd) {
+void playGame(int sockfd, std::string targetSentence) {
     bool gameOver = false;
-    //Read data from the connection to set targetSentence
-    char buffer[100];
-    memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-    int len = read(sockfd, buffer, 100); //Reading sentence from buffer
-    std::string targetSentence = buffer;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
     char userInput = 0;
     //TODO: Have this receive "terminate" packets to allow the server to asynchronously terminate
