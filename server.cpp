@@ -157,7 +157,27 @@ void listenPlayer(Player* player) {
         } else if(command == "read" || command == "cat") { //Allowing cat to be an alias for read
             temp = "PRINT: Unimplemented command: read";    
         } else if(command == "exec") {
-            temp = "PRINT: Unimplemented command: exec";    
+            if(arguments.size() != 1) {
+                temp = "PRINT: Invalid Argument(s)\nUsage: exec <executable>";
+            } else {
+                if(argument[0] == "johntheripper") {
+                    if(player->currentServer == nullptr) {
+                        temp = "PRINT: You don't need to crack your own password";
+                    } else {
+                        temp = "PRINT: ";
+                        for(std::pair<std::string, std::string> user : currentServer.users) {
+                            temp += user.first + "\t->\t" + user.second + "\n";
+                        }
+                    }
+                } else if(argument[0] == "pingsweep") {
+                    temp = "PRINT: ";
+                    for(VirtualServer vs : serverList {
+                        temp += vs.ip + " Host is up\n";
+                    })
+                } else {
+                    temp = "PRINT: Invalid executable";
+                }
+            }
         } else if (command == "cap") {
             if(arguments.size() != 2) {
                 temp = "PRINT: Invalid Arguemnt(s)\nUsage: cap <username> <password>";
