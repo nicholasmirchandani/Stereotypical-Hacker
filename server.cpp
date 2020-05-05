@@ -257,6 +257,17 @@ void listenPlayer(Player* player) {
                         write(player->socket, toClient, strlen(toClient));
                         write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
 
+                        //Waiting for both players to respond with something
+                        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+                        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+                        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
+                        fflush(stdout);
+
+                        memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+                        int len = read(serverList[targetIndex].currentPlayer->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+                        printf("Received %d bytes from socket %d: %s\n", len, serverList[targetIndex].currentPlayer->socket, buffer); //Prints out receivedMessage
+                        fflush(stdout);
+
                         //Once synchronization is out of the way, start the game
                         if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
                             //P2 Won!
