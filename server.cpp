@@ -4,6 +4,7 @@
 #include <thread> //for std::thread
 #include <exception> //for std::terminate
 #include <vector> //for std::vector
+#include <fstream> //For ifstream
 //Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
@@ -267,6 +268,36 @@ void initializeServers() {
     //TODO: Decide on how many servers and what their ips are
     for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
         VirtualServer vs;
+        std::vector<std::string> usernames_vec;
+        std::vector<std::string> passwords_vec;
+        ifstream users_is("usernames.txt");
+        if(users_is.fail()) {
+            std::cout << "usernames.txt could not be opened" << std::endl;
+            exit(1);
+        }
+        ifstream passwords_is("passwords");
+        if(passwords_is.fail()) {
+            std::cout << "passwords.txt could not be opened" << std::endl;
+            exit(1);
+        }
+        std::string temp;
+        while(!users_is.eof()) {
+            getline(users_is, temp);
+            usernames_vec.insert(usernames_vec.end(), temp);
+        }
+        while(!passwords_is.eof()) {
+            getline(passwords_is, temp);
+            passwords_vec.insert(passwords_vec.end(), temp);
+        }
+
+        for(std::string s : usernames_vec) {
+            std::cout << "USERNAME: " << s << std::endl;
+        }
+
+        for(std::string s : passwords_vec) {
+            std::cout << "PASSWORDS: " << s << std::endl;
+        }
+
         vs.ip = "192.168.1." + std::to_string(i);
         vs.rootUser = "admin";
         vs.rootPass = "adminPass";
