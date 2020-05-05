@@ -3,6 +3,7 @@
 #include "Player.h"
 #include <map>
 class VirtualServer {
+public:
     std::string ip; //Stored as a string for easy comparison for the server
     //Root User and pass are separate strings to make verification easier
     std::string rootUser;

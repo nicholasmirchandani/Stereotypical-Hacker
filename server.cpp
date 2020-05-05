@@ -182,7 +182,7 @@ void initializeServers() {
         vs.ip = "192.168.1." + std::to_string(i);
         std::cout << "DEBUG: Server " << i << "IP set to " << vs.ip << std::endl;
         //TODO: Initialize Usernames/Passwords including root username/password
-        serverList.insert(virtualServers.end(), vs);
+        serverList.insert(serverList.end(), vs);
     }
 }
 
