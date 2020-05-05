@@ -151,12 +151,12 @@ void waitForFIN(int serverSocket, bool* gameOver) {
         int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         if(len == 3) {
             *gameOver = true;
-            buffer[0] = 'A';
+            /*buffer[0] = 'A';
             buffer[1] = 'C';
             buffer[2] = 'K';
             std::cout << "DEBUG: SENDING ACK NOW!" << std::endl;
             //Sending FIN to both players to ensure they both exit their threads
-            write(serverSocket, buffer, 3);
+            write(serverSocket, buffer, 3);*/
             break; //If len is 3, it's 'FIN', and not some update on P2's index.
         }
     }

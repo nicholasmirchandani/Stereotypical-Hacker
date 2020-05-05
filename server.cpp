@@ -411,11 +411,11 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
-        fflush(stdout);
+        fflush(stdout);/*
         if(len == 3) {
             std::cout << "ACK RECEIVED!" << std::endl;
             break; //If len is 3, it's just 'ACK' to a 'FIN'
-        }
+        }*/
         //TODO: Ensure character is correct before incrementing index
         *index = *index + 1; //Incrementing index whenever a packet is received.
         if(*index >= targetSentence.length()) {
