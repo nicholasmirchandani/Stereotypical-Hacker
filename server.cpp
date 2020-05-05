@@ -16,7 +16,7 @@
 void initializeServers();
 void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
-void listenPlayer(int playerSocket);
+void listenPlayer(Player player);
 
 std::vector<VirtualServer> serverList;
 
@@ -50,9 +50,9 @@ int main() {
     //TODO: Lobby system to make the players start at the same time
     //Interweaving accept and thread calls so player doesn't have to wait for other to connect to begin
     p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
-    std::thread listenP1(listenPlayer, p1.socket);
+    std::thread listenP1(listenPlayer, p1);
     p2.socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
-    std::thread listenP2(listenPlayer, p2.socket);
+    std::thread listenP2(listenPlayer, p2);
 
     //Close the listening socket after we've connected our 2 players
     close(listeningSocket);
@@ -71,12 +71,12 @@ int main() {
 }
 
 //TODO: Pass player here instead of an int for better debug
-void listenPlayer(int playerSocket) {
+void listenPlayer(Player player) {
     while(true) {
         char buffer[100];
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
+        int len = read(player.socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        printf("Received %d bytes from socket %d: %s\n", len, player.socket, buffer); //Prints out receivedMessage
         fflush(stdout);
         std::string command(buffer);
         std::vector<std::string> arguments;
@@ -151,8 +151,31 @@ void listenPlayer(int playerSocket) {
             if(arguments.size() != 1) {
                 temp = "PRINT: Invalid Argument(s)\nUsage: ssh <ip-address>";
             } else {
-                temp = "PRINT: DEBUG: Take me to the server at ip address " + arguments[0];
-                //TODO: Create/Initialize virtualServers, check if the one here exists, and then go to it if it does
+                //Check if the argument exists as an ip to a virtual server (targetIndex of -1 meaning no), and then go to it if it does
+                int targetIndex = -1;
+                for(int i = 0; i < serverList.size(); ++i) {
+                    if(serverList[i].ip == arguments[0]) {
+                        targetIndex = i;
+                    }
+                }
+
+                if(targetIndex == -1) {
+                    temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
+                } else {
+                    if(player.currentServer != nullptr) {
+                        //Disconnect players from whatever server they're on when they connect to a new one.
+                        player.currentServer->currentPlayer = nullptr;
+                    }
+                    if(serverList[targetIndex].currentPlayer != nullptr) {
+                        //TODO: actually start game here
+                        std::cout << "DEBUG: START GAME!  MULTIPLE PLAYERS ARE CONNECTED TO THE SERVER!" << std::endl;
+                    }
+
+                    //TODO: Block here until game is complete via semaphores
+                    player.currentServer = &(serverList[targetIndex]);
+                    serverList[targetIndex].currentPlayer = &player;
+                    temp = "PRINT: Connected to server at ip address " + arguments[0];
+                }
             }
         } else if(command == "quit") {
             //Quit signals the client and server to both end
@@ -161,7 +184,7 @@ void listenPlayer(int playerSocket) {
             char* toClient = new char[temp.size()+1];
             std::copy(temp.begin(), temp.end(), toClient);
             toClient[temp.size()] = '\0';
-            write(playerSocket, toClient, strlen(toClient));
+            write(player.socket, toClient, strlen(toClient));
             break;
         } else {
             //Send all commands back to client if it isn't quit
@@ -171,7 +194,7 @@ void listenPlayer(int playerSocket) {
         char* toClient = new char[temp.size()+1];
         std::copy(temp.begin(), temp.end(), toClient);
         toClient[temp.size()] = '\0';
-        write(playerSocket, toClient, strlen(toClient));
+        write(player.socket, toClient, strlen(toClient));
     }
 }
 
@@ -180,7 +203,6 @@ void initializeServers() {
     for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
         VirtualServer vs;
         vs.ip = "192.168.1." + std::to_string(i);
-        std::cout << "DEBUG: Server " << i << "IP set to " << vs.ip << std::endl;
         //TODO: Initialize Usernames/Passwords including root username/password
         serverList.insert(serverList.end(), vs);
     }

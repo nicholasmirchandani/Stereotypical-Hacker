@@ -43,6 +43,7 @@ int main() {
     std::string command;
     char buffer[1000]; //Buffer 1000 instead of 100 to handle help easily
     while(true) {
+        //TODO: Modify this with your path as you're navigating, to better resemble a prompt and to display cwd and current server ip
         std::cout << username << "$ " << std::flush;
         std::getline(std::cin, command);
 
