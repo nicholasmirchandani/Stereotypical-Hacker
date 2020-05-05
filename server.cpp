@@ -16,6 +16,8 @@ void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(int playerSocket);
 
+std::vector<VirtualServer> serverList;
+
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
     //Socket code taken from springer and then modified
@@ -62,6 +64,7 @@ int main() {
     return 0;
 }
 
+//TODO: Pass player here instead of an int for better debug
 void listenPlayer(int playerSocket) {
     while(true) {
         char buffer[100];
@@ -70,7 +73,25 @@ void listenPlayer(int playerSocket) {
         printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
         fflush(stdout);
         std::string command(buffer);
-        std::string temp;
+        std::vector<std::string> arguments;
+        std::string temp(buffer); //Copying from buffer instead of command because it's probably faster
+        //TODO: Split command by space
+        for(int i = 0, j = 0; i < temp.length(); ++i) {
+            if(temp[i] == ' ') {
+                if(command == temp) {
+                    command = temp.substr(0, i);
+                    j = i;
+                } else {
+                    arguments.insert(temp.substr(j, i-j));
+                    j = i;
+                }
+            }
+        }
+        std::cout << "COMMAND: " << command << std::endl;
+        for(std::string argument : arguments) {
+            std::cout << "ARGUMENT: " << argument << std::endl;
+        }
+        temp = ""; //Reusing temp for optimization;
         if(command == "help") {
             //Help simply sends a long string with all available user commands
             temp = "PRINT: \n  --- USER COMMANDS ---\n\n";
@@ -135,6 +156,7 @@ void listenPlayer(int playerSocket) {
 
 //GAME CODE BELOW
 
+//TODO: Pass player here instead of an int for better debug
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 void playGame(int p1Socket, int p2Socket) {
     std::string targetSentence = "This is a new test sentence.";
@@ -160,6 +182,7 @@ void playGame(int p1Socket, int p2Socket) {
 }
 
 
+//TODO: Pass player here instead of an int for better debug
 //NOTE: This is insecure, poorly coded, and easily exploitable, as you can just flood the server with whatever you want atm.  Goal is to actually check packet contents eventually.
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver) {
     char buffer[100];
