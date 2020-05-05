@@ -270,12 +270,12 @@ void initializeServers() {
         VirtualServer vs;
         std::vector<std::string> usernames_vec;
         std::vector<std::string> passwords_vec;
-        ifstream users_is("usernames.txt");
+        std::ifstream users_is("usernames.txt");
         if(users_is.fail()) {
             std::cout << "usernames.txt could not be opened" << std::endl;
             exit(1);
         }
-        ifstream passwords_is("passwords");
+        std::ifstream passwords_is("passwords");
         if(passwords_is.fail()) {
             std::cout << "passwords.txt could not be opened" << std::endl;
             exit(1);
