@@ -70,12 +70,12 @@ int main() {
 }
 
 //TODO: Pass player here instead of an int for better debug
-void listenPlayer(Player player) {
+void listenPlayer(Player* player) {
     while(true) {
         char buffer[100];
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-        int len = read(player.socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-        printf("Received %d bytes from socket %d: %s\n", len, player.socket, buffer); //Prints out receivedMessage
+        int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
         fflush(stdout);
         std::string command(buffer);
         std::vector<std::string> arguments;
@@ -144,14 +144,14 @@ void listenPlayer(Player player) {
             if(arguments.size() != 2) {
                 temp = "PRINT: Invalid Arguemnt(s)\nUsage: cap <username> <password>";
             } else {
-                if(player.currentServer == nullptr) {
+                if(player->currentServer == nullptr) {
                     temp = "PRINT: ERROR: Cannot capture localhost"; 
                 } else {
-                    if(player.currentServer->captureServer(arguments[0], arguments[1])) {
+                    if(player->currentServer->captureServer(arguments[0], arguments[1])) {
                         temp = "PRINT: Server Captured";
                         //Upon capturing the server, player's currentServer gets reset as they're booted to localHost, but server keeps currentPlayer to remember who captured it
-                        player.currentServer = nullptr;
-                        ++(player.score);
+                        player->currentServer = nullptr;
+                        ++(player->score);
                         //TODO: Make player a pointer not a Player so everywhere gets updated and not just the copy
                     } else {
                         temp = "PRINT: Incorrect Username or Password";
@@ -173,15 +173,25 @@ void listenPlayer(Player player) {
                         targetIndex = i;
                     }
                 }
-
                 if(targetIndex == -1) {
-                    temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
+                    //If it's not found in the serverList, it's either localhost or an invalid IP
+                    if(arguments[0] == "localhost" || arguments[0] == "127.0.0.1") {
+                        //TODO: Have Player->ChangeServer as a refactor
+                        if(player->currentServer != nullptr) {
+                            //Disconnect players from whatever server they're on when they connect to a new one.
+                            player->currentServer->currentPlayer = nullptr;
+                        }
+                        player.currentServer = nullptr; //nullptr as a server refers to localHost
+                        temp = "PRINT: Connected to localhost";
+                    } else {
+                        temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
+                    }
                 } else if(serverList[targetIndex].captured) {
                     temp = "PRINT: Cannot ssh to a captured server";    
                 } else {
-                    if(player.currentServer != nullptr) {
+                    if(player->currentServer != nullptr) {
                         //Disconnect players from whatever server they're on when they connect to a new one.
-                        player.currentServer->currentPlayer = nullptr;
+                        player->currentServer->currentPlayer = nullptr;
                     }
                     if(serverList[targetIndex].currentPlayer != nullptr) {
                         //TODO: actually start game here
@@ -189,8 +199,8 @@ void listenPlayer(Player player) {
                     }
 
                     //TODO: Block here until game is complete via semaphores
-                    player.currentServer = &(serverList[targetIndex]);
-                    serverList[targetIndex].currentPlayer = &player;
+                    player->currentServer = &(serverList[targetIndex]);
+                    serverList[targetIndex].currentPlayer = player;
                     temp = "PRINT: Connected to server at ip address " + arguments[0];
                 }
             }
@@ -201,7 +211,7 @@ void listenPlayer(Player player) {
             char* toClient = new char[temp.size()+1];
             std::copy(temp.begin(), temp.end(), toClient);
             toClient[temp.size()] = '\0';
-            write(player.socket, toClient, strlen(toClient));
+            write(player->socket, toClient, strlen(toClient));
             break;
         } else {
             //Send all commands back to client if it isn't quit
@@ -211,7 +221,7 @@ void listenPlayer(Player player) {
         char* toClient = new char[temp.size()+1];
         std::copy(temp.begin(), temp.end(), toClient);
         toClient[temp.size()] = '\0';
-        write(player.socket, toClient, strlen(toClient));
+        write(player->socket, toClient, strlen(toClient));
     }
 }
 
