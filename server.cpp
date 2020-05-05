@@ -88,6 +88,12 @@ void listenPlayer(int playerSocket) {
                 }
             }
         }
+
+        if(j != temp.length()) {
+            //Adding the last element, not delineated by space
+            arguments.insert(arguments.end(), temp.substr(j));
+        }
+
         std::cout << "COMMAND: " << command << std::endl;
         for(std::string argument : arguments) {
             std::cout << "ARGUMENT: " << argument << std::endl;
