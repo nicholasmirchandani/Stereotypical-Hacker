@@ -1,6 +1,7 @@
 #ifndef VIRTUAL_SERVER_H
 #define VIRTUAL_SERVER_H
 #include "Player.h"
+#include <map>
 class VirtualServer {
     //Root User and pass are separate strings to make verification easier
     std::string rootUser;

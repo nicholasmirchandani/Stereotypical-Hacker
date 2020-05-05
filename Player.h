@@ -1,5 +1,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+class VirtualServer; //Forward declaration so the below doesn't error
 class Player {
 //TODO: Make everything private lol
 public:
