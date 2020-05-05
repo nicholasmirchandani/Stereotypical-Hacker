@@ -173,7 +173,7 @@ void listenPlayer(Player* player) {
                 } else if(arguments[0] == "pingsweep") {
                     temp = "PRINT: ";
                     for(VirtualServer vs : serverList) {
-                        temp += vs.ip + " Host is up\n";
+                        temp += vs.ip + (vs.captured ? " CAPTURED\n" : " Host is up\n");
                     }
                 } else {
                     temp = "PRINT: Invalid executable";
