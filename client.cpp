@@ -68,15 +68,16 @@ int main() {
             std::cout << serverResponse.substr(7) << std::endl;
         }
 
-        /*  Commented out to focus on framework
-            //Start Game Code
-            playGame(sockfd);
-        */
-
+        //Going to assume QUITGAME: as a directive for the client to quit
         if(serverResponse == "QUITGAME: ") {
             //When the server instructs the client to quit, the client quits
             break;
         }
+
+        /*  Commented out to focus on framework
+            //Start Game Code
+            playGame(sockfd);
+        */
     }
 
 

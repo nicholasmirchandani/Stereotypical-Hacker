@@ -8,7 +8,9 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
+//TODO: Move custom includes to the top and throw necessary includes in there to prevent this clusterfuck
 #include "Player.h"
+#include "VirtualServer.h"
 
 void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
