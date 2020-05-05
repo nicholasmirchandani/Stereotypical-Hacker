@@ -76,22 +76,26 @@ void listenPlayer(int playerSocket) {
         std::string command(buffer);
         std::vector<std::string> arguments;
         std::string temp(buffer); //Copying from buffer instead of command because it's probably faster
-        //TODO: Split command by space
-        for(int i = 0, j = 0; i < temp.length(); ++i) {
-            if(temp[i] == ' ') {
-                if(command == temp) {
-                    command = temp.substr(0, i);
-                    j = i;
-                } else {
-                    arguments.insert(arguments.end(), temp.substr(j, i-j));
-                    j = i;
+
+        //Split command by space
+        { //Using a block here so j is only as persistent as necessary
+            int j = 0;
+            for(int i = 0; i < temp.length(); ++i) {
+                if(temp[i] == ' ') {
+                    if(command == temp) {
+                        command = temp.substr(0, i);
+                        j = i;
+                    } else {
+                        arguments.insert(arguments.end(), temp.substr(j, i-j));
+                        j = i;
+                    }
                 }
             }
-        }
 
-        if(j != temp.length()) {
-            //Adding the last element, not delineated by space
-            arguments.insert(arguments.end(), temp.substr(j));
+            if(j != temp.length()) {
+                //Adding the last element, not delineated by space
+                arguments.insert(arguments.end(), temp.substr(j));
+            }
         }
 
         std::cout << "COMMAND: " << command << std::endl;
