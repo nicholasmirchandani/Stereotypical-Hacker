@@ -249,7 +249,7 @@ void listenPlayer(Player* player) {
                     if(serverList[targetIndex].currentPlayer != nullptr) {
                         //Play game: only need to set appropriate vars of other player
                         serverList[targetIndex].currentPlayer->playingGame = true;
-                        sem_wait(serverList[targetIndex].currentPlayer->ready);
+                        sem_wait(&(serverList[targetIndex].currentPlayer->ready));
 
                         //GAME PLAY CODE
 
@@ -269,7 +269,7 @@ void listenPlayer(Player* player) {
                         fflush(stdout);
 
                         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-                        int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+                        len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
                         printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
@@ -284,7 +284,7 @@ void listenPlayer(Player* player) {
                         }
 
                         serverList[targetIndex].currentPlayer->playingGame = false;
-                        sem_post(serverList[targetIndex].currentPlayer->ready);
+                        sem_post(&(serverList[targetIndex].currentPlayer->ready));
                     }
 
                     if(serverList[targetIndex].currentPlayer == nullptr) {
