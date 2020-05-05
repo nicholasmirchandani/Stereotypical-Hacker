@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "VirtualServer.h"
 
+void initializeServers();
 void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(int playerSocket);
@@ -21,6 +22,10 @@ std::vector<VirtualServer> serverList;
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
+
+    //Before network code, we need to initialize our serverList of Virtual Servers
+    initializeServers();
+
     //Socket code taken from springer and then modified
     int listeningSocket;
     struct sockaddr_in serverAddress, p1Address, p2Address;
@@ -167,6 +172,17 @@ void listenPlayer(int playerSocket) {
         std::copy(temp.begin(), temp.end(), toClient);
         toClient[temp.size()] = '\0';
         write(playerSocket, toClient, strlen(toClient));
+    }
+}
+
+void initializeServers() {
+    //TODO: Decide on how many servers and what their ips are
+    for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
+        VirtualServer vs;
+        vs.ip = "192.168.1." + std::to_string(i);
+        std::cout << "DEBUG: Server " << i << "IP set to " << vs.ip << std::endl;
+        //TODO: Initialize Usernames/Passwords including root username/password
+        virtualServers.insert(virtualServers.end(), vs);
     }
 }
 
