@@ -18,6 +18,7 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
 void listenPlayer(Player* player);
 
 std::vector<VirtualServer> serverList;
+std::vector<Player*> players;
 
 //NOTE: Just about everything in main is boilerplate code that won't be used in the final game.  just playGame; everything else should be handled by Lloyd and Alex
 int main() {
@@ -50,8 +51,10 @@ int main() {
     //Interweaving accept and thread calls so player doesn't have to wait for other to connect to begin
     p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
     std::thread listenP1(listenPlayer, &p1);
+    players.insert(players.end(), &p1); //Pointer so it's everywhere
     p2.socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
     std::thread listenP2(listenPlayer, &p2);
+    players.insert(players.end(), &p2); //Pointer so it's everywhere
 
     //Close the listening socket after we've connected our 2 players
     close(listeningSocket);
@@ -116,6 +119,9 @@ void listenPlayer(Player* player) {
         if(command == "help") {
             //Help simply sends a long string with all available user commands
             temp = "PRINT: \n  --- USER COMMANDS ---\n\n";
+
+            temp += "leaderboard - Lists all users and their scores\n";
+            temp += "   Usage: leaderboard\n\n";
 	        
             temp += "ls - Lists all files and subdirectories in current directory\n";
             temp += "   Usage: ls\n\n";
@@ -140,6 +146,12 @@ void listenPlayer(Player* player) {
 
             temp += "quit - Quits the game\n";
             temp += "   Usage: quit\n";
+        } else if(command == "leaderboard") {
+            temp = "PRINT: ";
+            temp += "Username: \tScore:"
+            for(Player* p in players) {
+                temp += p->username + "\t" + p->score + "\n";
+            }
         } else if(command == "ls") {
             temp = "PRINT: Unimplemented command: ls";    
         } else if(command == "read" || command == "cat") { //Allowing cat to be an alias for read
