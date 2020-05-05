@@ -160,20 +160,20 @@ void listenPlayer(Player* player) {
             if(arguments.size() != 1) {
                 temp = "PRINT: Invalid Argument(s)\nUsage: exec <executable>";
             } else {
-                if(argument[0] == "johntheripper") {
+                if(arguments[0] == "johntheripper") {
                     if(player->currentServer == nullptr) {
                         temp = "PRINT: You don't need to crack your own password";
                     } else {
                         temp = "PRINT: ";
-                        for(std::pair<std::string, std::string> user : currentServer.users) {
+                        for(std::pair<std::string, std::string> user : player->currentServer.users) {
                             temp += user.first + "\t->\t" + user.second + "\n";
                         }
                     }
-                } else if(argument[0] == "pingsweep") {
+                } else if(arguments[0] == "pingsweep") {
                     temp = "PRINT: ";
-                    for(VirtualServer vs : serverList {
+                    for(VirtualServer vs : serverList) {
                         temp += vs.ip + " Host is up\n";
-                    })
+                    }
                 } else {
                     temp = "PRINT: Invalid executable";
                 }
