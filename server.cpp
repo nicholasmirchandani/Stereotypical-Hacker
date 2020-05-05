@@ -413,6 +413,7 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
         printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
         fflush(stdout);
         if(len == 3) {
+            std::cout << "ACK RECEIVED!" << std::endl;
             break; //If len is 3, it's just 'ACK' to a 'FIN'
         }
         //TODO: Ensure character is correct before incrementing index
@@ -424,6 +425,7 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
             buffer[2] = 'N';
             buffer[3] = 0;
             //Sending FIN to both players to ensure they both exit their threads
+            std::cout << "SENDING FIN NOW!" << std::endl;
             write(playerSocket, buffer, strlen(buffer));
             write(otherSocket, buffer, strlen(buffer));
         }
