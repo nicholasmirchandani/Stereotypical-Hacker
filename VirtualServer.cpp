@@ -9,7 +9,10 @@ VirtualServer::VirtualServer() {
 }
 
 bool VirtualServer::captureServer(std::string username, std::string password) {
-    if(username.compare(rootUser) == 0 && password.compare(rootPass) == 0) {
+    std::cout << username << rootUser << password << rootPass << std::endl;
+    std::cout << "ROOT USER is USERNAME: " << username.compare(rootUser) == 0 << std::endl;
+    std::cout << "ROOT PASSWORD IS PASSWORD: " << password.compare(rootPass) == 0 << std::endl;
+    if((username.compare(rootUser) == 0) && (password.compare(rootPass) == 0)) {
         captured = true;
         return true;
     }
