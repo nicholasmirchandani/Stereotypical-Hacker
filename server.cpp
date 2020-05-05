@@ -266,6 +266,7 @@ void listenPlayer(Player* player) {
 
 void initializeServers() {
     //TODO: Decide on how many servers and what their ips are
+    srand(time(0));
     for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
         VirtualServer vs;
         std::vector<std::string> usernames_vec;
@@ -280,6 +281,7 @@ void initializeServers() {
             std::cout << "passwords.txt could not be opened" << std::endl;
             exit(1);
         }
+
         std::string temp;
         while(!users_is.eof()) {
             getline(users_is, temp);
@@ -294,19 +296,23 @@ void initializeServers() {
             }
         }
 
-        for(std::string s : usernames_vec) {
-            std::cout << "USERNAME: " << s << std::endl;
-        }
-
-        for(std::string s : passwords_vec) {
-            std::cout << "PASSWORDS: " << s << std::endl;
+        int numUsers = rand() % 6 + 5; //numUsers is 5-10
+        for(int j = 0; j < numUsers; ++j) {
+        ///If the username isn't unique within the collection, regenerate it
+        regenerateUsername:
+            std::string tempUser = usernames_vec[rand() % usernames_vec.size()];
+            for(std::pair<std::string, std::string> userInfo : vs.users) {
+                if(tempUser == userInfo.first) {
+                    goto regenerateUsername;
+                }
+            }
+            std::string tempPass = passwords_vec[rand() % usernames_vec.size()];
+            vs.users.insert(std::pair<std::string, std::string>(tempUser, tempPass));
         }
 
         vs.ip = "192.168.1." + std::to_string(i);
-        vs.rootUser = "admin";
-        vs.rootPass = "adminPass";
-        vs.users.insert(std::pair<std::string, std::string>(vs.rootUser, vs.rootPass)); //Moreso putting this in for now to check for errors
-        //TODO: Initialize Usernames/Passwords including root username/password
+        vs.rootUser = vs.users[rand() % vs.users.size()].first;
+        vs.rootPass = vs.users[rand() % vs.users.size()].second;
         serverList.insert(serverList.end(), vs);
     }
 }
