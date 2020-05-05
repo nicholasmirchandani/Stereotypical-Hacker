@@ -143,7 +143,12 @@ void listenPlayer(int playerSocket) {
         } else if (command == "cd") {
             temp = "PRINT: Unimplemented command: cd"; 
         } else if(command == "ssh") {
-            temp = "PRINT: Unimplemented command: ssh";    
+            if(arguments.size() != 1) {
+                temp = "PRINT: Invalid Argument(s)\nUsage: ssh <ip-address>";
+            } else {
+                temp = "PRINT: DEBUG: Take me to the server at ip address " + arguments[0];
+                //TODO: Create/Initialize virtualServers, check if the one here exists, and then go to it if it does
+            }
         } else if(command == "quit") {
             //Quit signals the client and server to both end
             temp = "QUITGAME: ";
