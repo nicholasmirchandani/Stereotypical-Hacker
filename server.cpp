@@ -275,7 +275,7 @@ void initializeServers() {
             std::cout << "usernames.txt could not be opened" << std::endl;
             exit(1);
         }
-        std::ifstream passwords_is("passwords");
+        std::ifstream passwords_is("passwords.txt");
         if(passwords_is.fail()) {
             std::cout << "passwords.txt could not be opened" << std::endl;
             exit(1);
