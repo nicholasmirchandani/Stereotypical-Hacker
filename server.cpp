@@ -181,7 +181,7 @@ void listenPlayer(Player* player) {
                             //Disconnect players from whatever server they're on when they connect to a new one.
                             player->currentServer->currentPlayer = nullptr;
                         }
-                        player.currentServer = nullptr; //nullptr as a server refers to localHost
+                        player->currentServer = nullptr; //nullptr as a server refers to localHost
                         temp = "PRINT: Connected to localhost";
                     } else {
                         temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
