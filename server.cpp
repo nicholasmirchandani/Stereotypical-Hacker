@@ -165,7 +165,7 @@ void listenPlayer(Player* player) {
                         temp = "PRINT: You don't need to crack your own password";
                     } else {
                         temp = "PRINT: ";
-                        for(std::pair<std::string, std::string> user : player->currentServer.users) {
+                        for(std::pair<std::string, std::string> user : player->currentServer->users) {
                             temp += user.first + "\t->\t" + user.second + "\n";
                         }
                     }
