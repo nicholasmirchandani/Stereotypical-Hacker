@@ -15,7 +15,7 @@
 void initializeServers();
 void playGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
-void listenPlayer(Player player);
+void listenPlayer(Player* player);
 
 std::vector<VirtualServer> serverList;
 
