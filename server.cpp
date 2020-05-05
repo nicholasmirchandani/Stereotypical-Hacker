@@ -176,7 +176,7 @@ void listenPlayer(Player player) {
 
                 if(targetIndex == -1) {
                     temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
-                } else if(serverList[i].captured) {
+                } else if(serverList[targetIndex].captured) {
                     temp = "PRINT: Cannot ssh to a captured server";    
                 } else {
                     if(player.currentServer != nullptr) {
