@@ -297,6 +297,7 @@ void initializeServers() {
         }
 
         int numUsers = rand() % 6 + 5; //numUsers is 5-10
+        int rootNum = rand() % numUsers;
         for(int j = 0; j < numUsers; ++j) {
         ///If the username isn't unique within the collection, regenerate it
         regenerateUsername:
@@ -308,11 +309,13 @@ void initializeServers() {
             }
             std::string tempPass = passwords_vec[rand() % usernames_vec.size()];
             vs.users.insert(std::pair<std::string, std::string>(tempUser, tempPass));
+            if(j == rootNum) {
+                vs.rootUser = tempUser;
+                vs.rootPass = tempPass;
+            }
         }
 
         vs.ip = "192.168.1." + std::to_string(i);
-        vs.rootUser = vs.users[rand() % vs.users.size()].first;
-        vs.rootPass = vs.users[rand() % vs.users.size()].second;
         serverList.insert(serverList.end(), vs);
     }
 }
