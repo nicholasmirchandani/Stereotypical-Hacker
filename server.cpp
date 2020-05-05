@@ -268,9 +268,6 @@ void listenPlayer(Player* player) {
                         printf("Received %d bytes from socket %d: %s\n", len, serverList[targetIndex].currentPlayer->socket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
-                        write(player->socket, toClient, strlen(toClient));
-                        write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
-
                         //Once synchronization is out of the way, start the game
                         if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
                             //P2 Won!
