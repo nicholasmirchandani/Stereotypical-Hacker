@@ -148,7 +148,7 @@ void listenPlayer(Player* player) {
             temp += "   Usage: quit\n";
         } else if(command == "leaderboard") {
             temp = "PRINT: ";
-            temp += "Username: \tScore:";
+            temp += "Username: \tScore:\n";
             for(Player* p : players) {
                 temp += p->username + "\t" + std::to_string(p->score) + "\n";
             }
