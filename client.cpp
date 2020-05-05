@@ -127,15 +127,16 @@ void playGame(int sockfd, std::string targetSentence) {
         if(gameOver) {
             break;
         }
-        //Sending server message about character user entered
-        //Step 4: Send data to the server, using c strings because c sockets
-        const char* prefix = "Correct character entered: "; //TODO: Make this send the message
+    //Sending server message about character user entered
+    //Step 4: Send data to the server, using c strings because c sockets
+    const char* prefix = "Correct character entered: "; //TODO: Make this send the message
 	char message[100];
 	strcpy(message, prefix);
 	strncat(message, &userInput, 1);
         write(sockfd, message, strlen(message));
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
+    std::cout << "DEBUG: Swapping to stty cooked" << std::endl;
     listenForFIN.join();
 }
 
