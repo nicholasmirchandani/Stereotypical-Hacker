@@ -4,6 +4,7 @@ class VirtualServer; //Forward declaration so the below doesn't error
 class Player {
 //TODO: Make everything private lol
 public:
+    Player();
     int socket;
 
     int score;
