@@ -15,6 +15,7 @@
 
 void initializeServers();
 bool playGame(int p1Socket, int p2Socket, std::string targetSentence);
+bool debugPlayGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(Player* player);
 
@@ -274,7 +275,7 @@ void listenPlayer(Player* player) {
 
 
                         //Once synchronization is out of the way, start the game
-                        if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
+                        if(debugPlayGame(player->socket, serverList[targetIndex].currentPlayer->socket)) {
                             //P2 Won!
                             //Disconnect original player from the server; Connecting winning user to the server is handled below
                             serverList[targetIndex].currentPlayer->currentServer = nullptr;
@@ -384,7 +385,8 @@ bool debugPlayGame(int p1Socket, int p2Socket) {
     char* toClient = new char[temp.size()+1];
     std::copy(temp.begin(), temp.end(), toClient);
     toClient[temp.size()] = '\0';
-    write(player->socket, toClient, strlen(toClient));
+    write(p1Socket, toClient, strlen(toClient));
+    write(p2Socket, toClient, strlen(toClient));
     if(input == "yes") {
         return false;
     } else {
@@ -449,5 +451,5 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
             write(otherSocket, buffer, strlen(buffer));
         }
     }
-    */
 }
+*/
