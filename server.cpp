@@ -90,7 +90,7 @@ void listenPlayer(Player player) {
                         command = temp.substr(0, i);
                         j = i;
                     } else {
-                        arguments.insert(arguments.end(), temp.substr(j + 1, i-j));
+                        arguments.insert(arguments.end(), temp.substr(j + 1, i-j-1)); //-1 to remove the space
                         j = i;
                     }
                 }
