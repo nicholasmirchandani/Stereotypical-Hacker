@@ -268,7 +268,7 @@ void initializeServers() {
     //TODO: Decide on how many servers and what their ips are
     srand(time(0));
     for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
-        VirtualServer vs;
+        VirtualServer vs();
         std::vector<std::string> usernames_vec;
         std::vector<std::string> passwords_vec;
         std::ifstream users_is("usernames.txt");
@@ -316,7 +316,6 @@ void initializeServers() {
         }
 
         vs.ip = "192.168.1." + std::to_string(i);
-        vs.captured = false;
         serverList.insert(serverList.end(), vs);
     }
 }
