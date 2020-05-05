@@ -138,6 +138,7 @@ void playGame(int sockfd, std::string targetSentence) {
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
     std::cout << "DEBUG: Swapping to stty cooked" << std::endl;
     listenForFIN.join();
+    std::cout << "ListenForFIN joined" << std::endl;
 }
 
 void waitForFIN(int serverSocket, bool* gameOver) {
