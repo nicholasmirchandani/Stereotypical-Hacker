@@ -92,13 +92,7 @@ void listenPlayer(Player* player) {
         printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
         fflush(stdout);
         if(player -> playingGame) {
-            //If the player is supposed to be playing the game, don't let their commands have any effect
-            //Sending DoNothing so the client doesn't stall
-            std::string temp = "DONOTHING: ";
-            char* toClient = new char[temp.size()+1];
-            std::copy(temp.begin(), temp.end(), toClient);
-            toClient[temp.size()] = '\0';
-            write(player->socket, toClient, strlen(toClient));
+            //If the player is supposed to be playing the game, let it give up teh ready semaphore and the command output will be the game instead
             continue;
         }
         std::string command(buffer);
