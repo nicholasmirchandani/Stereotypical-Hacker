@@ -8,7 +8,7 @@ VirtualServer::VirtualServer() {
     Player* currentPlayer = nullptr;
 }
 
-VirtualServer:~VirtualServer() {
+VirtualServer::~VirtualServer() {
     //Empty default destructor
 }
 
