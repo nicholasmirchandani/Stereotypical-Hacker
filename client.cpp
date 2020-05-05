@@ -95,7 +95,7 @@ int main() {
             delete(toServer);
 
             memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-            int len = read(sockfd, buffer, 1000);
+            int len = read(sockfd, buffer, 1000); //Have this read for a char received/cancel everything message, and terminate the thread on char receive
 
             //Once the synchronization with server is out of the way, play the game
             std::cout << "DEBUG: PLAY THE GAME!" << std::endl;

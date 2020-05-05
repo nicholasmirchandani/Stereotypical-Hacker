@@ -15,7 +15,6 @@
 
 void initializeServers();
 bool playGame(int p1Socket, int p2Socket, std::string targetSentence);
-bool debugPlayGame(int p1Socket, int p2Socket);
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver);
 void listenPlayer(Player* player);
 
@@ -261,7 +260,7 @@ void listenPlayer(Player* player) {
                         //Waiting for both players to respond with something
                         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
                         int len = read(player->socket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
-                        printf("Received %d bytes from socket %d: %s\n", len, player->socket, buffer); //Prints out receivedMessage
+                        printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
                         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
@@ -269,13 +268,11 @@ void listenPlayer(Player* player) {
                         printf("Received %d bytes from socket %d: %s\n", len, serverList[targetIndex].currentPlayer->socket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
-                        //Send both players something as an ack, in this case the playgame once again
                         write(player->socket, toClient, strlen(toClient));
                         write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
 
-
                         //Once synchronization is out of the way, start the game
-                        if(debugPlayGame(player->socket, serverList[targetIndex].currentPlayer->socket)) {
+                        if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
                             //P2 Won!
                             //Disconnect original player from the server; Connecting winning user to the server is handled below
                             serverList[targetIndex].currentPlayer->currentServer = nullptr;
@@ -374,27 +371,7 @@ void initializeServers() {
 }
 
 //GAME CODE BELOW
-bool debugPlayGame(int p1Socket, int p2Socket) {
-    bool gamePlaying;
-    bool p2Won;
-    std::string input;
-    std::cout << "Did P1 lose?  (yes/no)" << std::endl;
-    std::getline(std::cin, input);
 
-    std::string temp = "FIN";
-    char* toClient = new char[temp.size()+1];
-    std::copy(temp.begin(), temp.end(), toClient);
-    toClient[temp.size()] = '\0';
-    write(p1Socket, toClient, strlen(toClient));
-    write(p2Socket, toClient, strlen(toClient));
-    if(input == "yes") {
-        return false;
-    } else {
-        return true;
-    }
-}
-
-/*
 //TODO: Pass player here instead of an int for better debug
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 
@@ -452,4 +429,3 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
         }
     }
 }
-*/
