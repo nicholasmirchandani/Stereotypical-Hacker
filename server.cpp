@@ -86,7 +86,7 @@ void listenPlayer(int playerSocket) {
                         command = temp.substr(0, i);
                         j = i;
                     } else {
-                        arguments.insert(arguments.end(), temp.substr(j, i-j));
+                        arguments.insert(arguments.end(), temp.substr(j + 1, i-j));
                         j = i;
                     }
                 }
@@ -94,7 +94,7 @@ void listenPlayer(int playerSocket) {
 
             if(j != temp.length() - 1 && command != temp) {
                 //Adding the last element, not delineated by space
-                arguments.insert(arguments.end(), temp.substr(j));
+                arguments.insert(arguments.end(), temp.substr(j + 1));
             }
         }
 
