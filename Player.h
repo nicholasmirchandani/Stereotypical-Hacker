@@ -6,7 +6,6 @@ class Player {
 //TODO: Make everything private lol
 public:
     Player();
-    ~Player();
     int socket;
 
     int score;
