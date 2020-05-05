@@ -176,7 +176,7 @@ void listenPlayer(Player* player) {
                         temp += vs.ip + (vs.captured ? " CAPTURED\n" : " Host is up\n");
                     }
                 } else {
-                    temp = "PRINT: Invalid executable";
+                    temp = "PRINT: Invalid executable\nCurrent executables: pingsweep johntheripper";
                 }
             }
         } else if (command == "cap") {

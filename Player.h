@@ -11,5 +11,7 @@ public:
     int score;
     std::string username;
     VirtualServer* currentServer; //TODO: Test if this compile errors since both are dependent on each other
+
+    bool playingGame;
 };
 #endif
