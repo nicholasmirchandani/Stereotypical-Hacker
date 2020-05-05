@@ -141,7 +141,23 @@ void listenPlayer(Player player) {
         } else if(command == "exec") {
             temp = "PRINT: Unimplemented command: exec";    
         } else if (command == "cap") {
-            temp = "PRINT: Unimplemented command: cap";  
+            if(arguments.size() != 2) {
+                temp = "PRINT: Invalid Arguemnt(s)\nUsage: cap <username> <password>";
+            } else {
+                if(player.currentServer == nullptr) {
+                    temp = "PRINT: ERROR: Cannot capture localhost"; 
+                } else {
+                    if(player.currentServer->captureServer(arguments[0], arguments[1])) {
+                        temp = "PRINT: Server Captured";
+                        //Upon capturing the server, player's currentServer gets reset as they're booted to localHost, but server keeps currentPlayer to remember who captured it
+                        player.currentServer = nullptr;
+                        ++(player.score);
+                        //TODO: Make player a pointer not a Player so everywhere gets updated and not just the copy
+                    } else {
+                        temp = "PRINT: Incorrect Username or Password";
+                    }
+                }
+            }
         } else if (command == "pwd") {
             temp = "PRINT: Unimplemented command: pwd";  
         } else if (command == "cd") {
@@ -160,6 +176,8 @@ void listenPlayer(Player player) {
 
                 if(targetIndex == -1) {
                     temp = "PRINT: Invalid IP.  Use 'exec pingsweep' to see the ips you can connect to";
+                } else if(serverList[i].captured) {
+                    temp = "PRINT: Cannot ssh to a captured server";    
                 } else {
                     if(player.currentServer != nullptr) {
                         //Disconnect players from whatever server they're on when they connect to a new one.
@@ -202,6 +220,9 @@ void initializeServers() {
     for(int i = 2; i <= 10; ++i) { //Starting at 2 because .0 is the network, and .1 is typically a router or something
         VirtualServer vs;
         vs.ip = "192.168.1." + std::to_string(i);
+        vs.rootUser = "admin";
+        vs.rootPassword = "admin";
+        vs.users.insert(pair<std::string, std::string>(vs.rootUser, vs.rootPassword)); //Moreso putting this in for now to check for errors
         //TODO: Initialize Usernames/Passwords including root username/password
         serverList.insert(serverList.end(), vs);
     }

@@ -6,3 +6,11 @@ VirtualServer::VirtualServer() {
     bool captured = false;
     Player* currentPlayer = nullptr;
 }
+
+bool VirtualServer::captureServer(std::string username, std::string password) {
+    if(username == rootUser && password == rootPass) {
+        captured = true;
+        return true;
+    }
+    return false;
+}
