@@ -49,9 +49,9 @@ int main() {
     //TODO: Lobby system to make the players start at the same time
     //Interweaving accept and thread calls so player doesn't have to wait for other to connect to begin
     p1.socket = accept(listeningSocket, (struct sockaddr*)&p1Address, &client_len);
-    std::thread listenP1(listenPlayer, p1);
+    std::thread listenP1(listenPlayer, &p1);
     p2.socket = accept(listeningSocket, (struct sockaddr*)&p2Address, &client_len);
-    std::thread listenP2(listenPlayer, p2);
+    std::thread listenP2(listenPlayer, &p2);
 
     //Close the listening socket after we've connected our 2 players
     close(listeningSocket);
