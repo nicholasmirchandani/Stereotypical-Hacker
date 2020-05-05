@@ -5,6 +5,7 @@
 #include <exception> //for std::terminate
 #include <vector> //for std::vector
 #include <fstream> //For ifstream
+#include <semaphore.h> //For C semaphores
 //Networking Includes!
 #include <unistd.h>
 #include <sys/socket.h>
@@ -26,6 +27,10 @@ int main() {
 
     //Before network code, we need to initialize our serverList of Virtual Servers
     initializeServers();
+
+    //TEST SEMAPHORE CODE TO SEE IF IT ERRORS;
+    sem_t test;
+    sem_init(&test, 0, 0);
 
     //Socket code taken from springer and then modified
     int listeningSocket;
