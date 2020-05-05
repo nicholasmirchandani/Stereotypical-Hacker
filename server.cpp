@@ -417,7 +417,7 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
         //TODO: Ensure character is correct before incrementing index
         *index = *index + 1; //Incrementing index whenever a packet is received.
         std::cout << "Player index: " << *index << std::endl;
-        if(*index >= targetSentence.length()) {
+        if(*index >= targetSentence.length() - 1) {
             *gameOver = true;
             buffer[0] = 'F';
             buffer[1] = 'I';
