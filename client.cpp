@@ -87,12 +87,15 @@ int main() {
         //Server's actually combining the packets which is annoying
         if(serverResponse.substr(0,10) == "PLAYGAME: ") {
             std::string temp = "ACK";
-            //Send server an ACK to synchronize
+            //Send server an ACK and receive one to synchronize
             char* toServer = new char[temp.size()+1];
             std::copy(temp.begin(), temp.end(), toServer);
             toServer[temp.size()] = '\0';
             write(sockfd, toServer, strlen(toServer));
             delete(toServer);
+
+            memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+            int len = read(sockfd, buffer, 1000);
 
             //Once the synchronization with server is out of the way, play the game
             std::cout << "DEBUG: PLAY THE GAME!" << std::endl;

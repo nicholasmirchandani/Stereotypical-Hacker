@@ -268,6 +268,11 @@ void listenPlayer(Player* player) {
                         printf("Received %d bytes from socket %d: %s\n", len, serverList[targetIndex].currentPlayer->socket, buffer); //Prints out receivedMessage
                         fflush(stdout);
 
+                        //Send both players something as an ack, in this case the playgame once again
+                        write(player->socket, toClient, strlen(toClient));
+                        write(serverList[targetIndex].currentPlayer->socket, toClient, strlen(toClient));
+
+
                         //Once synchronization is out of the way, start the game
                         if(playGame(player->socket, serverList[targetIndex].currentPlayer->socket, "This is a new test sentence.")) {
                             //P2 Won!
@@ -368,7 +373,26 @@ void initializeServers() {
 }
 
 //GAME CODE BELOW
+bool debugPlayGame(int p1Socket, int p2Socket) {
+    bool gamePlaying;
+    bool p2Won;
+    std::string input;
+    std::cout << "Did P1 lose?  (yes/no)" << std::endl;
+    std::getline(std::cin, input);
 
+    std::string temp = "FIN";
+    char* toClient = new char[temp.size()+1];
+    std::copy(temp.begin(), temp.end(), toClient);
+    toClient[temp.size()] = '\0';
+    write(player->socket, toClient, strlen(toClient));
+    if(input == "yes") {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+/*
 //TODO: Pass player here instead of an int for better debug
 //NOTE: Sockets are ints because they're expected to be c style socket file descriptors.
 
@@ -425,4 +449,5 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
             write(otherSocket, buffer, strlen(buffer));
         }
     }
+    */
 }
