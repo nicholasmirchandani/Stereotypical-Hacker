@@ -277,7 +277,7 @@ void listenPlayer(Player* player) {
                         } else {
                             //P1(Defending Player) Won
                             //Don't let player connect to the server
-                            temp = "PRINT: You lost and thus were kicked from the server" + arguments[0];
+                            temp = "PRINT: You lost and thus were kicked from the server " + arguments[0];
                         }
 
                         otherPlayer->playingGame = false;
