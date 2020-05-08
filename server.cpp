@@ -269,13 +269,14 @@ void listenPlayer(Player* player) {
                         fflush(stdout);
 
                         //Once synchronization is out of the way, start the game
-                        if(playGame(player->socket, otherPlayer->socket, "This is a new test sentence.")) {
-                            //P2 Won!
+                        if(playGame(otherPlayer->socket, player->socket, "This is a new test sentence.")) {
+                            //P2(Attacking Player) Won!
                             //Disconnect original player from the server; Connecting winning user to the server is handled below
                             otherPlayer->currentServer = nullptr;
                             serverList[targetIndex].currentPlayer = nullptr;
                         } else {
-                            //P1 Won
+                            //P1(Defending Player) Won
+                            //Don't let player connect to the server
                             temp = "PRINT: You lost and thus were kicked from the server" + arguments[0];
                         }
 
