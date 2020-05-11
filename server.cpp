@@ -382,7 +382,15 @@ void initializeServers() {
 
 //Returns false if p1 wins, true if p2 wins
 bool playGame(int p1Socket, int p2Socket, std::string targetSentence) {
+    //TODO: Write to both player sockets game start!
+    std::string temp = "STARTGAME: ";
+    char* toClient = new char[temp.size()+1];
+    std::copy(temp.begin(), temp.end(), toClient);
+    toClient[temp.size()] = '\0';
+    write(p1Socket, toClient, strlen(toClient));
+    write(p2Socket, toClient, strlen(toClient));
     std::cout << "DEBUG: Playing game" << std::endl;
+
     int p1Index = 0;
     int p2Index = 0;
     //NOTE: Sockets don't need to be passed as pointers, since they're just file descriptors for the kernel

@@ -107,6 +107,12 @@ int main() {
 }
 
 void playGame(int sockfd, std::string targetSentence) {
+    std::cout << "Waiting for other player..." << std::endl;
+    char buffer[100];
+    memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
+    int len = read(serverSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+    std::string temp(buffer);
+    std::cout << "DEBUG: Read " << temp << " from buffer" << std::endl;
     bool gameOver = false;
     std::thread listenForFIN(waitForFIN, sockfd, &gameOver);
     char userInput = 0;
@@ -136,7 +142,6 @@ void playGame(int sockfd, std::string targetSentence) {
     }
     system("stty cooked"); //Swapping back the terminal to "cooked" to ensure terminal behaves normally upon exiting the program
     listenForFIN.join();
-    std::cout << "ListenForFIN joined" << std::endl;
 }
 
 void waitForFIN(int serverSocket, bool* gameOver) {
