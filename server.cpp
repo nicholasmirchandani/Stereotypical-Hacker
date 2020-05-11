@@ -276,6 +276,11 @@ void listenPlayer(Player* player) {
                             //Disconnect original player from the server; Connecting winning user to the server is handled below
                             otherPlayer->currentServer = nullptr;
                             serverList[targetIndex].currentPlayer = nullptr;
+                            temp = "PRINT: Your server was taken over by another player";
+                            char* toClient = new char[temp.size()+1];
+                            std::copy(temp.begin(), temp.end(), toClient);
+                            toClient[temp.size()] = '\0';
+                            write(otherPlayer->socket, toClient, strlen(toClient));
                         } else {
                             //P1(Defending Player) Won
                             //Don't let player connect to the server
