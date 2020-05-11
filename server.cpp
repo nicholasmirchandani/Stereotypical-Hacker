@@ -424,9 +424,9 @@ void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string
             buffer[1] = 'I';
             buffer[2] = 'N';
             buffer[3] = 0;
-            //Sending FIN to both players to ensure they both exit their threads
+            //Sending FIN to player to exit their thread prematurely
             std::cout << "SENDING FIN NOW!" << std::endl;
-            write(playerSocket, buffer, strlen(buffer));
+            //write(playerSocket, buffer, strlen(buffer));
             write(otherSocket, buffer, strlen(buffer));
         }
     }
