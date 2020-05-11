@@ -121,10 +121,11 @@ void listenPlayer(Player* player) {
             }
         }
 
-        std::cout << "COMMAND: " << command << std::endl;
+        std::cout << "COMMAND: " << command << " ";
         for(std::string argument : arguments) {
-            std::cout << "ARGUMENT: " << argument << std::endl;
+            std::cout << argument << " ";
         }
+        std::cout << std::endl;
         temp = ""; //Reusing temp for optimization;
         if(command == "help") {
             //Help simply sends a long string with all available user commands
