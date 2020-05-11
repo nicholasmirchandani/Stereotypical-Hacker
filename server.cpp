@@ -416,22 +416,24 @@ bool playGame(int p1Socket, int p2Socket, std::string targetSentence) {
 //TODO: Pass player here instead of an int for better debug
 //NOTE: This is insecure, poorly coded, and easily exploitable, as you can just flood the server with whatever you want atm.  Goal is to actually check packet contents eventually.
 void listenPlayerGame(int playerSocket, int otherSocket, int* index, std::string targetSentence, bool* gameOver) {
-    char buffer[100];
+    char buffer[28]; //Only using a buffer size of 28 to prevent multiple entries from buffering up
     //Check if either player has 'won' every step of the way by checking if the value of the index is > the length of targetSentence
     while(!(*gameOver)) {
         //Receive a packet from either p1 or p2, by having two separate threads handling each
         //Read data from the connection
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
-        int len = read(playerSocket, buffer, 100); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
+        int len = read(playerSocket, buffer, 28); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
         printf("Received %d bytes from socket %d: %s\n", len, playerSocket, buffer); //Prints out receivedMessage
         fflush(stdout);
         if(len == 3) {
             std::cout << "ACK RECEIVED!" << std::endl;
             break; //If len is 3, it's just 'ACK' to a 'FIN'
         }
-        //TODO: Ensure character is correct before incrementing index
-        *index = *index + 1; //Incrementing index whenever a packet is received.
-        std::cout << "Player index: " << *index << std::endl;
+        //Ensure character is correct before incrementing index
+        if(len == 28 && buffer[27] == targetSentence[*index]) {
+            *index = *index + 1; //Incrementing index whenever a packet is received.
+            std::cout << "Player index: " << *index << std::endl;
+        }
         if(*index >= targetSentence.length() - 1) {
             *gameOver = true;
             buffer[0] = 'F';
