@@ -66,6 +66,7 @@ int main() {
         write(sockfd, toServer, strlen(toServer));
         delete(toServer);
 
+        ReadFromServer:
         //Command specific client behavior going to be defined by the server in the end
         memset(buffer, 0, sizeof(buffer)); //Clearing the buffer before each read
         int len = read(sockfd, buffer, 1000); //TODO: Have this read for a char received/cancel everything message, and terminate the thread on char received
@@ -96,6 +97,7 @@ int main() {
 
             //Once the synchronization with server is out of the way, play the game
             playGame(sockfd, serverResponse.substr(10));
+            goto ReadFromServer; //Trying a simple goto statement to read the 'extra' buffered input in there
         }
     }
 
