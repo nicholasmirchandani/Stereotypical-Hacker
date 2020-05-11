@@ -127,7 +127,6 @@ void listenPlayer(Player* player) {
         }
         std::cout << std::endl;
         temp = ""; //Reusing temp for optimization;
-        std::cout << "DEBUG: Is temp actually cleared? TEMP: " << temp << std::endl;
         if(command == "help") {
             //Help simply sends a long string with all available user commands
             temp = "PRINT: \n  --- USER COMMANDS ---\n\n";
@@ -313,7 +312,6 @@ void listenPlayer(Player* player) {
             temp = "PRINT: Unknown command: " + command;
         }
         //Always send a message back to the player, to prevent it from waiting forever
-        std::cout << "DEBUG: Is temp actually set correctly? TEMP: " << temp << std::endl;
         char* toClient = new char[temp.size()+1];
         std::copy(temp.begin(), temp.end(), toClient);
         toClient[temp.size()] = '\0';
