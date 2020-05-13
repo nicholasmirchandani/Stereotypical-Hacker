@@ -6,8 +6,8 @@ Stereotypical Hacker – Mainframe Access Token is a project we’ve developed a
 ## Build Instructions
 NOTE: As of now, the game is built for linux machines utilizing C++ 11.  Can be compiled and run as shown below.
 ### For client: 
-g++ client.cpp -lpthread -o client
+g++ client.cpp -lpthread -o client <br>
 ./client
 ### For server: 
-g++ server.cpp Player.cpp VirtualServer.cpp -lpthread -O0 -o server
+g++ server.cpp Player.cpp VirtualServer.cpp -lpthread -O0 -o server <br>
 ./server
